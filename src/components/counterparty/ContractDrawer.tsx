@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, ArrowRight } from "lucide-react";
 import type { Contract, OverdueRecord } from "@/lib/mock-data";
+import { toneStyles } from "./header-theme";
 
 export function ContractDrawer({
   contract,
+  counterpartyName,
   measures,
   open,
   onOpenChange,
@@ -14,6 +16,7 @@ export function ContractDrawer({
   onAdvanceStage,
 }: {
   contract: Contract | null;
+  counterpartyName?: string;
   measures: string[];
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -26,33 +29,39 @@ export function ContractDrawer({
 
   if (!contract) return null;
   const overdue = contract.overdue > 0;
+  const tone = overdue ? "danger" : "safe";
+  const styles = toneStyles[tone];
+  const tagLabel = overdue ? "Есть просроченная задолженность" : "Без просрочки";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <div
-            className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] ${
-              overdue ? "bg-amber-100 text-amber-900" : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {overdue ? "Есть просроченная задолженность" : "Без просрочки"}
-          </div>
-          <SheetTitle className="!mt-2">{contract.number}</SheetTitle>
-          <p className="text-sm text-muted-foreground">от {contract.date} · сумма {contract.amount.toFixed(1)} млн. ₽</p>
-        </SheetHeader>
-
-        <div className="mt-6 space-y-5">
-          <div className="rounded-xl border border-border bg-white p-4 text-sm">
-            <Row label="Общая задолженность" value={`${contract.debt.toFixed(1)} млн. ₽`} />
-            <Row
+      <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-xl">
+        <div className={`px-6 pt-6 pb-5 ${styles.gradient}`}>
+          <SheetHeader className="space-y-0 text-left">
+            <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${styles.badge}`}>
+              {tagLabel}
+            </span>
+            <SheetTitle className="!mt-3 text-2xl font-semibold tracking-tight">{contract.number}</SheetTitle>
+            {counterpartyName && (
+              <p className="!mt-1 text-sm text-muted-foreground">{counterpartyName}</p>
+            )}
+          </SheetHeader>
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <DebtCard label="Задолженность" value={`${contract.debt.toFixed(1)} млн. ₽`} />
+            <DebtCard
               label="Просроченная задолженность"
               value={`${contract.overdue.toFixed(1)} млн. ₽`}
-              valueClass={overdue ? "text-amber-700" : ""}
+              accent={overdue}
             />
+          </div>
+        </div>
+        <div className="px-6 pb-6 pt-2">
+        <div className="mt-4 space-y-5">
+          <div className="rounded-xl border border-border bg-white p-4 text-sm">
             <Row label="Дней просрочки" value={contract.overdueDays ? String(contract.overdueDays) : "—"} />
             <Row label="Этап взыскания" value={contract.collectionStage ?? "Не начато"} />
           </div>
+
 
           <div>
             <div className="mb-2 text-sm font-semibold">Меры по контрагенту</div>
@@ -130,6 +139,7 @@ export function ContractDrawer({
             <ArrowRight className="mr-2 h-4 w-4" /> Перевести этап взыскания
           </Button>
         </div>
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -143,3 +153,15 @@ function Row({ label, value, valueClass = "" }: { label: string; value: string; 
     </div>
   );
 }
+
+function DebtCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="rounded-xl border border-border bg-white px-4 py-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-lg font-semibold ${accent ? "text-rose-600" : "text-foreground"}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
