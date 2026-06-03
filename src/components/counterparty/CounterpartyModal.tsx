@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ShieldCheck, Search, ChevronRight, Pencil, CheckCircle2, XCircle } from "lucide-react";
@@ -23,8 +23,7 @@ export function CounterpartyModal({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [contractDrawer, setContractDrawer] = useState<Contract | null>(null);
 
-  // Initialize when modal opens
-  useMemo(() => {
+  useEffect(() => {
     if (counterparty && open) {
       setRisks(counterparty.risks.map((r) => ({ ...r })));
       setContracts(counterparty.contracts.map((c) => ({ ...c })));
