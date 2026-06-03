@@ -7,12 +7,6 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// LOVABLE_KEEP_START
-// Не изменять этот блок: специфическая настройка basename для GitHub Pages
-const isGitHubPages = window.location.hostname.includes("github.io");
-const basename = isGitHubPages ? "/case-management-hub" : "";
-// LOVABLE_KEEP_END
-
 // Базовый путь для GitHub Pages (совпадает с `base` в vite.config.ts)
 const basename = import.meta.env.BASE_URL;
 
