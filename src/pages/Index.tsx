@@ -81,29 +81,70 @@ const tiles: {
   },
 ];
 
-const donutSegments = [
-  { key: "no_risk" as CategoryKey, value: 74.5, color: "#5BC48C", label: "В срок" },
-  { key: "risk" as CategoryKey, value: 9.5, color: "#E9C657", label: "Просроч. на 0-30 д" },
-  { key: "overdue" as CategoryKey, value: 9.5, color: "#EDB05A", label: "Просроч. на 30-60 д" },
-  { key: "overdue_risk" as CategoryKey, value: 6.5, color: "#E26B3A", label: "Просроч. на 60+ д" },
+type Segment = { key: string; value: number; color: string; label: string };
+
+const defaultSegments: Segment[] = [
+  { key: "no_risk", value: 74.5, color: "#5BC48C", label: "В срок" },
+  { key: "risk", value: 9.5, color: "#E9C657", label: "Просроч. на 0-30 д" },
+  { key: "overdue", value: 9.5, color: "#EDB05A", label: "Просроч. на 30-60 д" },
+  { key: "overdue_risk", value: 6.5, color: "#E26B3A", label: "Просроч. на 60+ д" },
 ];
 
-function Donut({ active }: { active: CategoryKey | null }) {
+const categoryPalette: Record<CategoryKey, { amount: string; segments: Segment[] }> = {
+  risk: {
+    amount: "1,3",
+    segments: [
+      { key: "a", label: "В срок", value: 45, color: "#FBE9A8" },
+      { key: "b", label: "Просроч. на 0-30 д", value: 25, color: "#F4D470" },
+      { key: "c", label: "Просроч. на 30-60 д", value: 18, color: "#E9C657" },
+      { key: "d", label: "Просроч. на 60+ д", value: 12, color: "#B5912F" },
+    ],
+  },
+  overdue_risk: {
+    amount: "1,4",
+    segments: [
+      { key: "a", label: "В срок", value: 40, color: "#F8D2BE" },
+      { key: "b", label: "Просроч. на 0-30 д", value: 25, color: "#F0A788" },
+      { key: "c", label: "Просроч. на 30-60 д", value: 20, color: "#E26B3A" },
+      { key: "d", label: "Просроч. на 60+ д", value: 15, color: "#9A3A18" },
+    ],
+  },
+  no_risk: {
+    amount: "1,2",
+    segments: [
+      { key: "a", label: "В срок", value: 50, color: "#C5ECD4" },
+      { key: "b", label: "Просроч. на 0-30 д", value: 22, color: "#8FD8AE" },
+      { key: "c", label: "Просроч. на 30-60 д", value: 18, color: "#5BC48C" },
+      { key: "d", label: "Просроч. на 60+ д", value: 10, color: "#1E6B43" },
+    ],
+  },
+  overdue: {
+    amount: "1,2",
+    segments: [
+      { key: "a", label: "В срок", value: 38, color: "#FBE0BC" },
+      { key: "b", label: "Просроч. на 0-30 д", value: 27, color: "#F4C384" },
+      { key: "c", label: "Просроч. на 30-60 д", value: 20, color: "#EDB05A" },
+      { key: "d", label: "Просроч. на 60+ д", value: 15, color: "#8B5A14" },
+    ],
+  },
+};
+
+function Donut({ amount, segments }: { amount: string; segments: Segment[] }) {
   const size = 220;
   const stroke = 26;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
+  const total = segments.reduce((s, x) => s + x.value, 0);
   let acc = 0;
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--muted))" strokeWidth={stroke} fill="none" opacity={0.25} />
-        {donutSegments.map((s) => {
-          const len = (s.value / 100) * c;
+        {segments.map((s) => {
+          const len = (s.value / total) * c;
           const dash = `${len} ${c - len}`;
           const offset = -acc;
           acc += len;
-          const dim = active && active !== s.key;
           return (
             <circle
               key={s.key}
@@ -111,19 +152,18 @@ function Donut({ active }: { active: CategoryKey | null }) {
               cy={size / 2}
               r={r}
               stroke={s.color}
-              strokeWidth={active === s.key ? stroke + 4 : stroke}
+              strokeWidth={stroke}
               fill="none"
               strokeDasharray={dash}
               strokeDashoffset={offset}
               strokeLinecap="butt"
-              opacity={dim ? 0.25 : 1}
               className="transition-all duration-300"
             />
           );
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="text-2xl font-semibold tracking-tight">4,7</div>
+        <div className="text-2xl font-semibold tracking-tight">{amount}</div>
         <div className="-mt-0.5 text-xs text-muted-foreground">млн. ₽</div>
       </div>
     </div>
@@ -253,8 +293,10 @@ export default function Index() {
                       <button
                         key={t.key}
                         onClick={() => setFilter(isActive ? null : t.key)}
-                        className={`rounded-2xl ${t.bg} px-4 py-4 text-left transition ring-1 ring-inset ring-transparent hover:ring-2 ${
-                          isActive ? `ring-2 ${t.ring} shadow-sm` : ""
+                        className={`rounded-2xl px-4 py-4 text-left transition ${
+                          isActive
+                            ? `${t.bg.replace("/60", "")} ring-2 ${t.ring} shadow-md brightness-105 saturate-150`
+                            : `${t.bg} ring-1 ring-inset ring-transparent hover:ring-2 ${filter ? "opacity-60" : ""}`
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -274,19 +316,20 @@ export default function Index() {
 
                 <div className="flex items-center gap-6">
                   <ul className="space-y-2 text-sm">
-                    {donutSegments.map((s) => (
+                    {(filter ? categoryPalette[filter].segments : defaultSegments).map((s) => (
                       <li key={s.key} className="flex items-center gap-2">
                         <span
                           className="inline-block h-2 w-2 rounded-full"
-                          style={{ background: s.color, opacity: filter && filter !== s.key ? 0.3 : 1 }}
+                          style={{ background: s.color }}
                         />
-                        <span className={filter && filter !== s.key ? "text-muted-foreground" : ""}>
-                          {s.label}
-                        </span>
+                        <span>{s.label}</span>
                       </li>
                     ))}
                   </ul>
-                  <Donut active={filter} />
+                  <Donut
+                    amount={filter ? categoryPalette[filter].amount : "4,7"}
+                    segments={filter ? categoryPalette[filter].segments : defaultSegments}
+                  />
                 </div>
               </div>
             </div>
