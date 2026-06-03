@@ -514,11 +514,36 @@ export default function Index() {
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tagCls}`}>
                         {c.tag}
                       </span>
-                      {openSignals > 0 && (
-                        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">
-                          {openSignals} сигн.
-                        </span>
-                      )}
+                      {(() => {
+                        const types = Array.from(new Set(c.risks.map((r) => r.type)));
+                        const shown = types.slice(0, 2);
+                        const rest = types.length - shown.length;
+                        return (
+                          <>
+                            {shown.map((t) => {
+                              const cfg = riskChipShort[t];
+                              return (
+                                <span
+                                  key={t}
+                                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${cfg.cls}`}
+                                >
+                                  {cfg.short}
+                                </span>
+                              );
+                            })}
+                            {rest > 0 && (
+                              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                + ещё {rest}
+                              </span>
+                            )}
+                            {openSignals > 0 && (
+                              <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">
+                                {openSignals} сигн.
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                       <div className="mt-0.5 w-full text-[11px] text-muted-foreground">
                         Этап: {stage} · обн. {c.lastUpdate}
                       </div>
