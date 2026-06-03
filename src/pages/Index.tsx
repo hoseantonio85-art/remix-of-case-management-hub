@@ -323,47 +323,78 @@ export default function Index() {
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="overflow-hidden rounded-xl border border-border bg-white">
               {filtered.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center text-sm text-muted-foreground">
+                <div className="p-8 text-center text-sm text-muted-foreground">
                   Нет дебиторов в этой категории
                 </div>
               )}
-              {filtered.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setActive(c)}
-                  className="w-full rounded-2xl border border-border bg-white p-5 text-left transition hover:border-primary/40 hover:shadow-sm"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FBE3D6]/70 px-2.5 py-1 text-xs text-[#8B4A1F]">
+              {filtered.map((c, idx) => {
+                const openSignals = c.risks.filter(
+                  (r) => r.status === "pending" || r.status === "verification",
+                ).length;
+                const stage = c.collection.find((s) => s.status === "current")?.stage ?? "—";
+                const tagCls =
+                  c.status === "overdue_risk"
+                    ? "bg-amber-100 text-amber-900"
+                    : c.status === "risk"
+                      ? "bg-amber-50 text-amber-800"
+                      : c.status === "overdue"
+                        ? "bg-orange-50 text-orange-800"
+                        : "bg-emerald-50 text-emerald-800";
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setActive(c)}
+                    className={`grid w-full grid-cols-12 items-center gap-3 px-4 py-3 text-left transition hover:bg-muted/40 ${
+                      idx > 0 ? "border-t border-border" : ""
+                    }`}
+                  >
+                    <div className="col-span-12 sm:col-span-4">
+                      <div className="text-sm font-medium">{c.name}</div>
+                      <div className="mt-0.5 text-[11px] text-muted-foreground">
+                        ИНН {c.inn} · {c.contracts.length} дог.
+                      </div>
+                    </div>
+                    <div className="col-span-6 sm:col-span-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Задолженность
+                      </div>
+                      <div className="text-sm font-medium">{c.totalDebt}</div>
+                    </div>
+                    <div className="col-span-6 sm:col-span-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Просрочено
+                      </div>
+                      <div
+                        className={`text-sm font-medium ${
+                          c.overdueAmountNum > 0 ? "text-amber-700" : ""
+                        }`}
+                      >
+                        {c.overdueDebt}
+                      </div>
+                    </div>
+                    <div className="col-span-12 flex flex-wrap items-center gap-1.5 sm:col-span-3">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tagCls}`}>
                         {c.tag}
-                        <ArrowDown className="h-3 w-3" />
-                      </div>
-                      <div className="mt-2 text-lg font-semibold">{c.name}</div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        <ChevronRight className="h-3 w-3" />
-                        {c.inn} · {c.contracts.length} договора
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-8">
-                      <button className="rounded-full border border-border bg-white px-3 py-1.5 text-xs hover:bg-accent">
-                        Внесите данные
-                      </button>
-                      <div>
-                        <div className="text-xs text-muted-foreground">Задолженность</div>
-                        <div className="text-base font-semibold">{c.totalDebt}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground">Просроченная</div>
-                        <div className="text-base font-semibold text-destructive">{c.overdueDebt}</div>
+                      </span>
+                      {openSignals > 0 && (
+                        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">
+                          {openSignals} сигн.
+                        </span>
+                      )}
+                      <div className="mt-0.5 w-full text-[11px] text-muted-foreground">
+                        Этап: {stage} · обн. {c.lastUpdate}
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                    <div className="col-span-12 hidden justify-end sm:col-span-1 sm:flex">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+
           </div>
         </main>
       </div>
