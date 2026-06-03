@@ -444,6 +444,13 @@ export function CounterpartyModal({
         </DialogContent>
       </Dialog>
 
+      <DebtProcessDrawer
+        steps={steps}
+        open={debtDrawerOpen}
+        onOpenChange={setDebtDrawerOpen}
+        onAdvance={advanceStage}
+        error={stepperError}
+      />
 
       <RiskDrawer
         risk={editing}
