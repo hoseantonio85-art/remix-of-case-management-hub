@@ -447,6 +447,7 @@ export function CounterpartyModal({
       />
 
       <ContractDrawer
+        counterpartyName={counterparty.name}
         contract={contractDrawer}
         measures={allMeasures}
         open={!!contractDrawer}
