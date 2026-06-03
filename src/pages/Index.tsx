@@ -293,8 +293,10 @@ export default function Index() {
                       <button
                         key={t.key}
                         onClick={() => setFilter(isActive ? null : t.key)}
-                        className={`rounded-2xl ${t.bg} px-4 py-4 text-left transition ring-1 ring-inset ring-transparent hover:ring-2 ${
-                          isActive ? `ring-2 ${t.ring} shadow-sm` : ""
+                        className={`rounded-2xl px-4 py-4 text-left transition ${
+                          isActive
+                            ? `${t.bg.replace("/60", "")} ring-2 ${t.ring} shadow-md brightness-105 saturate-150`
+                            : `${t.bg} ring-1 ring-inset ring-transparent hover:ring-2 ${filter ? "opacity-60" : ""}`
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
