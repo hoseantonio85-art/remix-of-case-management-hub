@@ -87,13 +87,13 @@ export function RiskDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
+      <SheetContent side="right" className="w-full overflow-y-auto bg-white sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>Решение по сигналу</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          <div className="rounded-xl border border-border bg-muted/40 p-4">
+          <div className="rounded-xl border border-border bg-slate-50/60 p-4">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Выбранный риск</div>
             <div className="mt-1 font-semibold">{risk.type}</div>
             <div className="mt-1 text-sm text-muted-foreground">{risk.description}</div>
