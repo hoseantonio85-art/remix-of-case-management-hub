@@ -48,6 +48,7 @@ export function CounterpartyModal({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [contractDrawer, setContractDrawer] = useState<Contract | null>(null);
   const [stepperError, setStepperError] = useState<string | null>(null);
+  const [showAllPending, setShowAllPending] = useState(false);
 
   useEffect(() => {
     if (counterparty && open) {
