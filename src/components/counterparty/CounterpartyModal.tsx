@@ -358,7 +358,7 @@ export function CounterpartyModal({
                     </div>
                   ))}
                   {verification.map((r) => (
-                    <div key={r.id} className="rounded-xl border border-border bg-slate-50 p-4">
+                    <div key={r.id} className="rounded-xl border border-border bg-white p-4">
                       <DecisionHeader
                         icon={<Clock className="h-4 w-4" />}
                         iconCls="bg-slate-200 text-slate-700"
