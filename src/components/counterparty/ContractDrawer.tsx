@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, ArrowRight } from "lucide-react";
 import type { Contract, OverdueRecord } from "@/lib/mock-data";
+import { toneStyles } from "./header-theme";
 
 export function ContractDrawer({
   contract,
