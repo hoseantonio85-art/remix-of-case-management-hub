@@ -70,26 +70,34 @@ export function DebtStepper({
                     {stage}
                   </div>
                 </div>
-                <div className="ml-1 space-y-1.5 border-l border-border pl-5">
+                <div className="ml-1 space-y-1.5 border-l border-border pl-7">
                   {stageSteps.map((s) => {
                     const isCurrent = s.status === "current";
                     const animateThis = isCurrent && animating;
+                    const globalIdx = steps.findIndex((x) => x.id === s.id);
+                    const num = globalIdx + 1;
                     return (
                     <div key={s.id} className="relative">
-                      <div className="absolute -left-[26px] top-1.5">
+                      <div className="absolute -left-[34px] top-0.5">
                         {s.status === "done" ? (
-                          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                            <Check className="h-2.5 w-2.5" />
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-primary bg-primary text-[10px] font-semibold text-primary-foreground">
+                            <Check className="h-3 w-3" />
                           </div>
                         ) : isCurrent ? (
                           <div
                             key={`cur-${stepAnim?.tick ?? "static"}-${s.id}`}
-                            className={`h-4 w-4 rounded-full border-2 transition-transform duration-500 ${
-                              s.overdue ? "border-amber-500 bg-amber-100" : "border-primary bg-primary/20"
+                            className={`flex h-6 w-6 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-transform duration-500 ${
+                              s.overdue
+                                ? "border-amber-500 bg-amber-50 text-amber-700"
+                                : "border-primary bg-primary/10 text-primary"
                             } ${animateThis ? "scale-125" : "scale-100"}`}
-                          />
+                          >
+                            {num}
+                          </div>
                         ) : (
-                          <div className="h-4 w-4 rounded-full border-2 border-border bg-white" />
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-white text-[10px] font-semibold text-muted-foreground">
+                            {num}
+                          </div>
                         )}
                       </div>
                       <div
