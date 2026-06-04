@@ -110,6 +110,7 @@ export function ContractDrawer({
   const [dueDate, setDueDate] = useState("");
   const [overdueComment, setOverdueComment] = useState("");
   const [localOverdues, setLocalOverdues] = useState<LocalOverdue[]>([]);
+  const [overdueError, setOverdueError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!contract || !open) return;
