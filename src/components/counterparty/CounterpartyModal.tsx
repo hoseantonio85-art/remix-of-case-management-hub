@@ -54,6 +54,10 @@ export function CounterpartyModal({
   const [stepperError, setStepperError] = useState<string | null>(null);
   const [showAllPending, setShowAllPending] = useState(false);
   const [debtDrawerOpen, setDebtDrawerOpen] = useState(false);
+  const [notification, setNotification] = useState<
+    { tone: "success" | "info"; text: string } | null
+  >(null);
+  const [updatedStepId, setUpdatedStepId] = useState<string | null>(null);
 
   useEffect(() => {
     if (counterparty && open) {
@@ -61,6 +65,8 @@ export function CounterpartyModal({
       setContracts(counterparty.contracts.map((c) => ({ ...c, overdueHistory: [...c.overdueHistory] })));
       setSteps(counterparty.collection.map((s) => ({ ...s })));
       setStepperError(null);
+      setNotification(null);
+      setUpdatedStepId(null);
     }
   }, [counterparty, open]);
 
