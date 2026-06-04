@@ -57,7 +57,9 @@ export function CounterpartyModal({
   const [notification, setNotification] = useState<
     { tone: "success" | "info"; text: string } | null
   >(null);
-  const [updatedStepId, setUpdatedStepId] = useState<string | null>(null);
+  const [stepAnim, setStepAnim] = useState<
+    { direction: "forward" | "backward"; tick: number } | null
+  >(null);
 
   useEffect(() => {
     if (counterparty && open) {
@@ -66,9 +68,16 @@ export function CounterpartyModal({
       setSteps(counterparty.collection.map((s) => ({ ...s })));
       setStepperError(null);
       setNotification(null);
-      setUpdatedStepId(null);
+      setStepAnim(null);
     }
   }, [counterparty, open]);
+
+  // Auto-clear the highlight after the animation window.
+  useEffect(() => {
+    if (!stepAnim) return;
+    const t = setTimeout(() => setStepAnim(null), 1400);
+    return () => clearTimeout(t);
+  }, [stepAnim]);
 
   const pending = useMemo(() => risks.filter((r) => r.status === "pending"), [risks]);
   const verification = useMemo(() => risks.filter((r) => r.status === "verification"), [risks]);
