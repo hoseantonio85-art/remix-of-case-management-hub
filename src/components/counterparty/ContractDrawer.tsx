@@ -512,43 +512,19 @@ export function ContractDrawer({
   );
 }
 
-function MiniTimeline({
-  currentIdx,
-  prev,
-  cur,
-  next,
+function Field({
+  label,
+  value,
+  valueClass = "",
 }: {
-  currentIdx: number;
-  prev: string | null;
-  cur: string;
-  next: string | null;
+  label: string;
+  value: string;
+  valueClass?: string;
 }) {
-  const items: { num: number; title: string; status: "prev" | "cur" | "next" }[] = [];
-  if (prev) items.push({ num: currentIdx, title: prev, status: "prev" });
-  items.push({ num: currentIdx + 1, title: cur, status: "cur" });
-  if (next) items.push({ num: currentIdx + 2, title: next, status: "next" });
-
   return (
-    <div className="space-y-2">
-      {items.map((it) => {
-        const isCur = it.status === "cur";
-        return (
-          <div key={it.num} className="flex items-center gap-3">
-            <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-all ${
-                isCur
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                  : "border-border bg-white text-muted-foreground"
-              }`}
-            >
-              {it.num}
-            </div>
-            <div className={`text-sm ${isCur ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-              {it.title}
-            </div>
-          </div>
-        );
-      })}
+    <div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-sm font-medium ${valueClass}`}>{value}</div>
     </div>
   );
 }
