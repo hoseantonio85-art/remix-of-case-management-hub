@@ -129,7 +129,8 @@ export function DebtStepper({
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
