@@ -572,7 +572,7 @@ export function CounterpartyModal({
             <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start lg:mt-[40px]">
               <DebtSummaryCard
                 steps={steps}
-                highlightStepId={updatedStepId}
+                stepAnim={stepAnim}
                 onOpenDetails={() => setDebtDrawerOpen(true)}
               />
             </aside>
@@ -583,7 +583,7 @@ export function CounterpartyModal({
         {/* In-modal drawers */}
         <DebtProcessDrawer
           steps={steps}
-          highlightStepId={updatedStepId}
+          stepAnim={stepAnim}
           open={debtDrawerOpen}
           onOpenChange={setDebtDrawerOpen}
           onAdvance={advanceStage}
