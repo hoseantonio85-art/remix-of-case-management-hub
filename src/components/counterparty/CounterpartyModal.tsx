@@ -25,7 +25,12 @@ import type {
 import { RiskDrawer, type DecisionKind, type RiskSavePayload } from "./RiskDrawer";
 import { ContractDrawer } from "./ContractDrawer";
 import { DebtSummaryCard } from "./DebtSummaryCard";
-import { DebtProcessDrawer } from "./DebtProcessDrawer";
+import {
+  DebtProcessDrawer,
+  type DebtHistoryEntry,
+  type CompletedFields,
+} from "./DebtProcessDrawer";
+import { stepMetaByTitle } from "@/lib/debt-process";
 import { getToneForTag, toneStyles } from "./header-theme";
 import { riskMeta } from "./risk-meta";
 
