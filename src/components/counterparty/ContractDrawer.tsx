@@ -487,26 +487,20 @@ export function ContractDrawer({
         </Card>
 
         {/* STAGE HISTORY */}
-        <Card title="История этапов договора" icon={<HistoryIcon className="h-3.5 w-3.5" />}>
-          {history.length === 0 ? (
-            <div className="text-sm text-muted-foreground">История пока пуста</div>
-          ) : (
-            <div className="overflow-hidden rounded-md border border-border">
-              {history.slice(0, 3).map((h, i) => (
-                <div
-                  key={i}
-                  className={`px-3 py-2 text-xs ${i > 0 ? "border-t border-border" : ""}`}
-                >
-                  <div className="font-medium">
-                    {h.date} · {h.action} · {h.step}
-                  </div>
-                  <div className="text-muted-foreground">{h.user}</div>
-                  {h.comment && <div className="text-muted-foreground">{h.comment}</div>}
+        {history.length === 0 ? (
+          <div className="px-1 text-xs text-muted-foreground">История пока пуста</div>
+        ) : (
+          <section className="rounded-xl border border-border bg-white p-4">
+            <div className="mb-2 text-xs font-semibold text-foreground">История этапов договора</div>
+            <div className="space-y-1.5">
+              {history.slice(0, 2).map((h, i) => (
+                <div key={i} className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{h.date}</span> · {h.action} · {h.step}
                 </div>
               ))}
             </div>
-          )}
-        </Card>
+          </section>
+        )}
       </div>
     </InModalDrawer>
   );
