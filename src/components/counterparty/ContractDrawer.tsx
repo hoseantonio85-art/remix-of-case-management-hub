@@ -314,87 +314,29 @@ export function ContractDrawer({
           </div>
         )}
 
-        {/* CASE LINK */}
-        <Card title="Связь с кейсом контрагента">
-          <Row label="Статус кейса" value={caseStatusLabel ?? "—"} />
-          <div className="mt-2">
-            <div className="text-xs text-muted-foreground">Подтвержденные риски</div>
-            {confirmedRisks.length > 0 ? (
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {confirmedRisks.map((r) => (
-                  <Chip key={r}>{r}</Chip>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-1 text-sm text-muted-foreground">Нет подтвержденных рисков</div>
-            )}
-          </div>
-          <div className="mt-3">
-            <div className="text-xs text-muted-foreground">Принятые меры</div>
-            {measures.length > 0 ? (
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {measures.map((m) => (
-                  <Chip key={m}>{m}</Chip>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-1 text-sm text-muted-foreground">
-                Меры по контрагенту пока не выбраны
-              </div>
-            )}
-          </div>
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-            <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <div>
-              Влияние на договор:{" "}
-              {measures.length > 0
-                ? "договор участвует в кейсе взыскания, меры применяются ко всем договорам контрагента."
-                : "договор пока не вовлечен в активные меры по кейсу."}
-            </div>
-          </div>
-        </Card>
-
-        {/* WORK ON CONTRACT */}
+        {/* WORK ON CONTRACT — compact */}
         <Card title="Работа по договору">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <Row label="Стадия" value={stageByStep[currentTitle] ?? "—"} />
-            <Row label="Этап" value={currentTitle} />
-            <Row label="Дата начала" value={stepStartedAt} />
-            <Row label="SLA" value={curMeta?.slaLabel ?? "—"} />
-            <Row
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <Field label="Этап" value={currentTitle} />
+            <Field
               label="Плановая дата"
               value={dueDateObj ? formatDDMMYYYY(dueDateObj) : "—"}
             />
-            <Row
+            <Field
               label="Статус срока"
               value={
                 daysRemaining === null
                   ? "—"
                   : daysRemaining >= 0
-                    ? `осталось ${daysRemaining} дн.`
-                    : `просрочено на ${-daysRemaining} дн.`
+                    ? `Осталось ${daysRemaining} дн.`
+                    : `Срок истек на ${-daysRemaining} дн.`
               }
               valueClass={
                 daysRemaining !== null && daysRemaining < 0 ? "text-amber-700" : ""
               }
             />
-            <Row label="Ответственный" value={DEFAULT_RESPONSIBLE} />
           </div>
 
-          {daysRemaining !== null && daysRemaining < 0 && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              Срок истек на {-daysRemaining} дн.
-            </div>
-          )}
-
-          {/* mini-timeline */}
-          <div className="mt-4 border-t border-border pt-4">
-            <div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-              Этапы взыскания
-            </div>
-            <MiniTimeline currentIdx={stepIdx} prev={prevTitle} cur={currentTitle} next={nextTitle ?? null} />
-          </div>
 
           {/* Change stage */}
           <div className="mt-4 border-t border-border pt-4">
@@ -545,68 +487,38 @@ export function ContractDrawer({
         </Card>
 
         {/* STAGE HISTORY */}
-        <Card title="История этапов договора" icon={<HistoryIcon className="h-3.5 w-3.5" />}>
-          {history.length === 0 ? (
-            <div className="text-sm text-muted-foreground">История пока пуста</div>
-          ) : (
-            <div className="overflow-hidden rounded-md border border-border">
-              {history.slice(0, 3).map((h, i) => (
-                <div
-                  key={i}
-                  className={`px-3 py-2 text-xs ${i > 0 ? "border-t border-border" : ""}`}
-                >
-                  <div className="font-medium">
-                    {h.date} · {h.action} · {h.step}
-                  </div>
-                  <div className="text-muted-foreground">{h.user}</div>
-                  {h.comment && <div className="text-muted-foreground">{h.comment}</div>}
+        {history.length === 0 ? (
+          <div className="px-1 text-xs text-muted-foreground">История пока пуста</div>
+        ) : (
+          <section className="rounded-xl border border-border bg-white p-4">
+            <div className="mb-2 text-xs font-semibold text-foreground">История этапов договора</div>
+            <div className="space-y-1.5">
+              {history.slice(0, 2).map((h, i) => (
+                <div key={i} className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{h.date}</span> · {h.action} · {h.step}
                 </div>
               ))}
             </div>
-          )}
-        </Card>
+          </section>
+        )}
       </div>
     </InModalDrawer>
   );
 }
 
-function MiniTimeline({
-  currentIdx,
-  prev,
-  cur,
-  next,
+function Field({
+  label,
+  value,
+  valueClass = "",
 }: {
-  currentIdx: number;
-  prev: string | null;
-  cur: string;
-  next: string | null;
+  label: string;
+  value: string;
+  valueClass?: string;
 }) {
-  const items: { num: number; title: string; status: "prev" | "cur" | "next" }[] = [];
-  if (prev) items.push({ num: currentIdx, title: prev, status: "prev" });
-  items.push({ num: currentIdx + 1, title: cur, status: "cur" });
-  if (next) items.push({ num: currentIdx + 2, title: next, status: "next" });
-
   return (
-    <div className="space-y-2">
-      {items.map((it) => {
-        const isCur = it.status === "cur";
-        return (
-          <div key={it.num} className="flex items-center gap-3">
-            <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-all ${
-                isCur
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                  : "border-border bg-white text-muted-foreground"
-              }`}
-            >
-              {it.num}
-            </div>
-            <div className={`text-sm ${isCur ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-              {it.title}
-            </div>
-          </div>
-        );
-      })}
+    <div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-sm font-medium ${valueClass}`}>{value}</div>
     </div>
   );
 }
