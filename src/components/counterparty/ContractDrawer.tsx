@@ -434,11 +434,117 @@ export function ContractDrawer({
           </div>
         </Card>
 
-        {/* OVERDUE HISTORY */}
-        <Card title="История просрочек">
+        {/* OVERDUE HISTORY + INLINE ADD */}
+        <section className="rounded-xl border border-border bg-white p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold">История просрочек</div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 text-xs"
+              onClick={() => {
+                setShowAddOverdue((v) => !v);
+                setOverdueError(null);
+                setOverdueAddedNotice(false);
+              }}
+            >
+              {showAddOverdue ? (
+                <>
+                  <ChevronUp className="mr-1.5 h-3.5 w-3.5" /> Скрыть
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Добавить
+                </>
+              )}
+            </Button>
+          </div>
+
+          {overdueAddedNotice && !showAddOverdue && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <div className="flex-1">Просрочка добавлена</div>
+              <button
+                onClick={() => setOverdueAddedNotice(false)}
+                className="text-emerald-700 hover:underline"
+              >
+                Скрыть
+              </button>
+            </div>
+          )}
+
+          {showAddOverdue && (
+            <div className="mb-3 rounded-2xl border border-border bg-muted/30 p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <LabeledInput
+                  label="Сумма просроченной ДЗ, ₽"
+                  value={amount}
+                  onChange={(v) => {
+                    setAmount(v);
+                    setOverdueError(null);
+                  }}
+                  placeholder="100000"
+                />
+                <LabeledInput
+                  label="Дата возникновения"
+                  value={occurDate}
+                  onChange={(v) => {
+                    setOccurDate(v);
+                    setOverdueError(null);
+                  }}
+                  placeholder="ДД.ММ.ГГГГ"
+                />
+                <LabeledInput
+                  label="Срок исполнения / дата оплаты"
+                  value={dueDate}
+                  onChange={setDueDate}
+                  placeholder="ДД.ММ.ГГГГ"
+                />
+                <LabeledInput
+                  label="Комментарий"
+                  value={overdueComment}
+                  onChange={setOverdueComment}
+                  placeholder="—"
+                />
+              </div>
+              {computedDays !== null && (
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Дней просрочки:{" "}
+                  <span className="font-medium text-foreground">{computedDays}</span>
+                </div>
+              )}
+              {overdueError && (
+                <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {overdueError}
+                </div>
+              )}
+              <div className="mt-3 flex items-center gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleAddOverdue}
+                  disabled={!amount || !occurDate}
+                >
+                  Добавить запись
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setShowAddOverdue(false);
+                    setOverdueError(null);
+                  }}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          )}
+
           {allOverdues.length === 0 ? (
             <div className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-              Записей нет
+              Записей о просрочке пока нет
             </div>
           ) : (
             <div className="overflow-hidden rounded-md border border-border">
@@ -453,66 +559,15 @@ export function ContractDrawer({
                   <div className="text-muted-foreground">
                     Источник: {h.source ?? "NORM AI"}
                   </div>
-                  {h.comment && <div className="text-muted-foreground">{h.comment}</div>}
+                  {h.comment && (
+                    <div className="text-muted-foreground">{h.comment}</div>
+                  )}
                 </div>
               ))}
             </div>
           )}
-        </Card>
+        </section>
 
-        {/* ADD OVERDUE */}
-        <Card title="Добавить просрочку">
-          <div className="grid grid-cols-2 gap-2">
-            <LabeledInput
-              label="Сумма просроченной ДЗ, ₽"
-              value={amount}
-              onChange={(v) => {
-                setAmount(v);
-                setOverdueError(null);
-              }}
-              placeholder="100000"
-            />
-            <LabeledInput
-              label="Дата возникновения"
-              value={occurDate}
-              onChange={(v) => {
-                setOccurDate(v);
-                setOverdueError(null);
-              }}
-              placeholder="ДД.ММ.ГГГГ"
-            />
-            <LabeledInput
-              label="Срок исполнения / дата оплаты"
-              value={dueDate}
-              onChange={setDueDate}
-              placeholder="ДД.ММ.ГГГГ"
-            />
-            <LabeledInput
-              label="Комментарий"
-              value={overdueComment}
-              onChange={setOverdueComment}
-              placeholder="—"
-            />
-          </div>
-          {computedDays !== null && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              Дней просрочки: <span className="font-medium text-foreground">{computedDays}</span>
-            </div>
-          )}
-          {overdueError && (
-            <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              {overdueError}
-            </div>
-          )}
-          <Button
-            className="mt-3 w-full"
-            onClick={handleAddOverdue}
-            disabled={!amount || !occurDate}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Добавить запись
-          </Button>
-        </Card>
 
         {/* STAGE HISTORY */}
         {history.length === 0 ? (
