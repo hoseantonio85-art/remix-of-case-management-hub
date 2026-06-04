@@ -10,7 +10,10 @@ import {
   Clock,
   Calendar,
   X,
+  CheckCircle2,
+  Info as InfoIcon,
 } from "lucide-react";
+import { pickFurthestStepTitle } from "./collection-mapping";
 
 import type {
   Counterparty,
@@ -51,6 +54,10 @@ export function CounterpartyModal({
   const [stepperError, setStepperError] = useState<string | null>(null);
   const [showAllPending, setShowAllPending] = useState(false);
   const [debtDrawerOpen, setDebtDrawerOpen] = useState(false);
+  const [notification, setNotification] = useState<
+    { tone: "success" | "info"; text: string } | null
+  >(null);
+  const [updatedStepId, setUpdatedStepId] = useState<string | null>(null);
 
   useEffect(() => {
     if (counterparty && open) {
@@ -58,6 +65,8 @@ export function CounterpartyModal({
       setContracts(counterparty.contracts.map((c) => ({ ...c, overdueHistory: [...c.overdueHistory] })));
       setSteps(counterparty.collection.map((s) => ({ ...s })));
       setStepperError(null);
+      setNotification(null);
+      setUpdatedStepId(null);
     }
   }, [counterparty, open]);
 
@@ -137,6 +146,57 @@ export function CounterpartyModal({
         };
       }),
     );
+
+    if (payload.kind === "dismiss") {
+      setNotification({
+        tone: "info",
+        text: "Риск снят. Этап работы с задолженностью не изменился.",
+      });
+      return;
+    }
+    if (payload.kind === "verify") {
+      setNotification({
+        tone: "info",
+        text: "Сигнал отправлен на дополнительную проверку. Этап взыскания не изменился.",
+      });
+      return;
+    }
+
+    // confirm: try to advance collection process
+    setSteps((prev) => {
+      const titles = prev.map((s) => s.title);
+      const target = pickFurthestStepTitle(payload.measures, titles);
+      const currentIdx = prev.findIndex((s) => s.status === "current");
+      const targetIdx = target ? titles.indexOf(target) : -1;
+      if (target == null || targetIdx === -1 || targetIdx <= currentIdx) {
+        setNotification({
+          tone: "success",
+          text: "Риск подтвержден. Этап работы с задолженностью не изменился.",
+        });
+        return prev;
+      }
+      const next = prev.map((s, i) => {
+        if (i < targetIdx) return { ...s, status: "done" as const, overdue: false };
+        if (i === targetIdx)
+          return {
+            ...s,
+            status: "current" as const,
+            startDate: new Date().toLocaleDateString("ru-RU"),
+            sla: s.sla ?? "7 дней",
+            plannedDate:
+              s.plannedDate ?? new Date(Date.now() + 7 * 86400000).toLocaleDateString("ru-RU"),
+            overdue: false,
+            nextAction: s.nextAction ?? "Запланировать следующее действие",
+          };
+        return { ...s, status: "upcoming" as const };
+      });
+      setUpdatedStepId(next[targetIdx].id);
+      setNotification({
+        tone: "success",
+        text: `Риск подтвержден. Новый этап работы с задолженностью: ${target}`,
+      });
+      return next;
+    });
   };
 
   const advanceStage = () => {
@@ -250,6 +310,30 @@ export function CounterpartyModal({
 
           <div className="grid grid-cols-1 gap-6 bg-white px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-6 min-w-0">
+            {notification && (
+              <div
+                className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm ${
+                  notification.tone === "success"
+                    ? "border-emerald-200 bg-emerald-50/70 text-emerald-900"
+                    : "border-border bg-slate-50 text-foreground"
+                }`}
+                role="status"
+              >
+                {notification.tone === "success" ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                ) : (
+                  <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+                <div className="flex-1 leading-snug">{notification.text}</div>
+                <button
+                  onClick={() => setNotification(null)}
+                  className="shrink-0 rounded p-0.5 text-muted-foreground transition hover:bg-black/5 hover:text-foreground"
+                  aria-label="Закрыть уведомление"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
             {/* Section: Requires decision */}
             <section>
               <SectionTitle title="Требуют решения" count={sortedPending.length} tone="warn" />
@@ -440,7 +524,11 @@ export function CounterpartyModal({
 
             {/* Right column: meta */}
             <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start lg:mt-[40px]">
-              <DebtSummaryCard steps={steps} onOpenDetails={() => setDebtDrawerOpen(true)} />
+              <DebtSummaryCard
+                steps={steps}
+                highlightStepId={updatedStepId}
+                onOpenDetails={() => setDebtDrawerOpen(true)}
+              />
             </aside>
 
           </div>
@@ -449,6 +537,7 @@ export function CounterpartyModal({
         {/* In-modal drawers */}
         <DebtProcessDrawer
           steps={steps}
+          highlightStepId={updatedStepId}
           open={debtDrawerOpen}
           onOpenChange={setDebtDrawerOpen}
           onAdvance={advanceStage}
