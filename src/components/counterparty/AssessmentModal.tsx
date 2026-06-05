@@ -22,22 +22,22 @@ const statusMeta: Record<
   pending: {
     label: "Требует подтверждения",
     chip: "bg-amber-100 text-amber-900",
-    headerBg: "bg-gradient-to-b from-amber-50 to-white",
+    headerBg: "bg-amber-50",
   },
   confirmed: {
     label: "Подтверждена",
     chip: "bg-emerald-100 text-emerald-800",
-    headerBg: "bg-gradient-to-b from-emerald-50 to-white",
+    headerBg: "bg-emerald-50",
   },
   disagreed: {
     label: "Не согласовано",
     chip: "bg-orange-100 text-orange-900",
-    headerBg: "bg-gradient-to-b from-orange-50 to-white",
+    headerBg: "bg-orange-50",
   },
   updated: {
     label: "Обновлена",
     chip: "bg-sky-100 text-sky-900",
-    headerBg: "bg-gradient-to-b from-sky-50 to-white",
+    headerBg: "bg-sky-50",
   },
 };
 
@@ -133,7 +133,7 @@ export function AssessmentModal({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-900/10 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden rounded-3xl border bg-background p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-3xl">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden rounded-3xl border bg-white p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-3xl">
         <div className="relative flex h-full flex-col">
           {/* Header */}
           <div className={cn("relative border-b border-border px-7 pt-6 pb-5", meta.headerBg)}>
@@ -199,9 +199,9 @@ export function AssessmentModal({
             )}
 
             {runOpen && onRun && (
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="rounded-xl border border-border bg-slate-50/60 p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-white text-muted-foreground">
                     <RefreshCw className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -256,7 +256,7 @@ export function AssessmentModal({
               <div className="order-1 lg:col-start-1 lg:row-start-1">
                 <div className="rounded-2xl border border-border bg-white p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
                       <Sparkles className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
