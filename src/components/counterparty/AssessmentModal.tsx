@@ -159,7 +159,7 @@ export function AssessmentModal({
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.cls}`}>
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.chip}`}>
                 {meta.label}
               </span>
               <span className="text-[11px] text-muted-foreground">Оценка контрагента</span>
