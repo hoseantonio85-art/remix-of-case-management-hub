@@ -138,25 +138,6 @@ export function AssessmentModal({
           {/* Header */}
           <div className={cn("relative border-b border-border px-7 pt-6 pb-5", meta.headerBg)}>
             <div className="absolute right-5 top-5 flex items-center gap-2">
-              {onRun && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 rounded-full px-3 text-xs"
-                  onClick={() => setRunOpen((v) => !v)}
-                  disabled={running}
-                >
-                  {running ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Запуск…
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-3.5 w-3.5" /> Запустить новую оценку
-                    </>
-                  )}
-                </Button>
-              )}
               <button
                 onClick={() => onOpenChange(false)}
                 className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
@@ -165,6 +146,7 @@ export function AssessmentModal({
                 <X className="h-4 w-4" />
               </button>
             </div>
+
             <div className="flex flex-wrap items-center gap-2">
               <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.chip}`}>
                 {meta.label}
@@ -292,37 +274,57 @@ export function AssessmentModal({
 
               {/* What changed — right, spans both rows */}
               <aside className="order-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-                <div className="rounded-2xl border border-border bg-white p-4 lg:sticky lg:top-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-foreground">Что изменилось</div>
-                      <div className="text-[11px] text-muted-foreground">За последний период</div>
-                    </div>
-                    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
-                      {assessment.changes.length}
-                    </span>
-                  </div>
-                  <div className="mt-3">
-                    {assessment.changes.length === 0 ? (
-                      <div className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-                        За последний период новых факторов не обнаружено
+                <div className="space-y-3 lg:sticky lg:top-0">
+                  <div className="rounded-2xl border border-border bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">Что изменилось</div>
+                        <div className="text-[11px] text-muted-foreground">За последний период</div>
                       </div>
-                    ) : (
-                      <ul className="divide-y divide-border">
-                        {assessment.changes.map((c, i) => (
-                          <li key={i} className="flex items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
-                            <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${toneStyles[c.tone].dot}`} />
-                            <div className="min-w-0 flex-1">
-                              <div className="text-xs leading-snug text-foreground">{c.text}</div>
-                              <div className="mt-0.5 text-[10px] text-muted-foreground">
-                                {toneLabel[c.tone]}
+                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground">
+                        {assessment.changes.length}
+                      </span>
+                    </div>
+                    <div className="mt-3">
+                      {assessment.changes.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                          За последний период новых факторов не обнаружено
+                        </div>
+                      ) : (
+                        <ul className="divide-y divide-border">
+                          {assessment.changes.map((c, i) => (
+                            <li key={i} className="flex items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
+                              <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${toneStyles[c.tone].dot}`} />
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs leading-snug text-foreground">{c.text}</div>
+                                <div className="mt-0.5 text-[10px] text-muted-foreground">
+                                  {toneLabel[c.tone]}
+                                </div>
                               </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
+                  {onRun && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setRunOpen((v) => !v)}
+                      disabled={running}
+                      className="h-11 w-full rounded-full border bg-white text-sm font-medium"
+                    >
+                      {running ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" /> Запуск…
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4" /> Запустить новую оценку
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </aside>
 
