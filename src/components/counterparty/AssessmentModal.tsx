@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info, RefreshCw, Loader2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
