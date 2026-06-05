@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info, RefreshCw, Loader2 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   type Assessment,
   type AssessmentGroup,
@@ -14,11 +15,30 @@ import { AssessmentGroupDrawer } from "./AssessmentGroupDrawer";
 
 export type AssessmentStatus = "pending" | "confirmed" | "disagreed" | "updated";
 
-const statusMeta: Record<AssessmentStatus, { label: string; cls: string }> = {
-  pending: { label: "Требует подтверждения", cls: "bg-amber-100 text-amber-900" },
-  confirmed: { label: "Подтверждена", cls: "bg-emerald-100 text-emerald-800" },
-  disagreed: { label: "Не согласовано", cls: "bg-slate-200 text-slate-800" },
-  updated: { label: "Обновлена", cls: "bg-primary/10 text-primary" },
+const statusMeta: Record<
+  AssessmentStatus,
+  { label: string; chip: string; headerBg: string }
+> = {
+  pending: {
+    label: "Требует подтверждения",
+    chip: "bg-amber-100 text-amber-900",
+    headerBg: "bg-gradient-to-b from-amber-50 to-white",
+  },
+  confirmed: {
+    label: "Подтверждена",
+    chip: "bg-emerald-100 text-emerald-800",
+    headerBg: "bg-gradient-to-b from-emerald-50 to-white",
+  },
+  disagreed: {
+    label: "Не согласовано",
+    chip: "bg-orange-100 text-orange-900",
+    headerBg: "bg-gradient-to-b from-orange-50 to-white",
+  },
+  updated: {
+    label: "Обновлена",
+    chip: "bg-sky-100 text-sky-900",
+    headerBg: "bg-gradient-to-b from-sky-50 to-white",
+  },
 };
 
 const REASONS = [
@@ -103,11 +123,13 @@ export function AssessmentModal({
 
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-5xl gap-0 overflow-hidden rounded-3xl sm:rounded-3xl p-0 [&>button]:hidden">
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-900/10 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 gap-0 overflow-hidden rounded-3xl border bg-background p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-3xl">
         <div className="relative flex h-full flex-col">
           {/* Header */}
-          <div className="relative border-b border-border bg-gradient-to-b from-slate-50 to-white px-7 pt-6 pb-5">
+          <div className={cn("relative border-b border-border px-7 pt-6 pb-5", meta.headerBg)}>
             <div className="absolute right-5 top-5 flex items-center gap-2">
               {onRun && (
                 <Button
@@ -137,7 +159,7 @@ export function AssessmentModal({
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.cls}`}>
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.chip}`}>
                 {meta.label}
               </span>
               <span className="text-[11px] text-muted-foreground">Оценка контрагента</span>
@@ -431,8 +453,9 @@ export function AssessmentModal({
             onOpenChange={(o) => !o && setGroupDrawer(null)}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
 
