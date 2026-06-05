@@ -72,7 +72,7 @@ export function AssessmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-3xl gap-0 overflow-hidden rounded-3xl sm:rounded-3xl p-0 [&>button]:hidden">
+      <DialogContent className="h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-[96vw] max-w-5xl gap-0 overflow-hidden rounded-3xl sm:rounded-3xl p-0 [&>button]:hidden">
         <div className="relative flex h-full flex-col">
           {/* Header */}
           <div className="relative border-b border-border bg-gradient-to-b from-slate-50 to-white px-7 pt-6 pb-5">
