@@ -53,8 +53,6 @@ const stateMeta: Record<AssessmentStatus, StateMeta> = {
 
 export function AssistantSummaryCard({
   onOpen,
-  onRun,
-  running,
   status,
   confirmedAt,
   confirmedBy,
@@ -62,8 +60,6 @@ export function AssistantSummaryCard({
   sourceLabel,
 }: {
   onOpen: () => void;
-  onRun: () => void;
-  running?: boolean;
   status: AssessmentStatus;
   confirmedAt?: string;
   confirmedBy?: string;
@@ -113,23 +109,6 @@ export function AssistantSummaryCard({
             <Button size="sm" className="h-8 px-3 text-xs" onClick={onOpen}>
               Открыть оценку
               <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 px-3 text-xs"
-              onClick={onRun}
-              disabled={running}
-            >
-              {running ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Запуск оценки…
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5" /> Запустить оценку
-                </>
-              )}
             </Button>
           </div>
         </div>
