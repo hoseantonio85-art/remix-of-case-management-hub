@@ -159,7 +159,7 @@ export function AssessmentModal({
               )}
               <button
                 onClick={() => onOpenChange(false)}
-                className="rounded-full bg-white/70 p-1.5 text-muted-foreground backdrop-blur hover:bg-white"
+                className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
                 aria-label="Закрыть"
               >
                 <X className="h-4 w-4" />
