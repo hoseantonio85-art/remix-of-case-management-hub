@@ -141,7 +141,7 @@ export function AssessmentModal({
         >
         <div className="relative flex h-full flex-col">
           {/* Header */}
-          <div className={cn("relative border-b border-border px-7 pt-6 pb-5", meta.headerBg)}>
+          <div className={cn("relative border-b border-border px-5 pt-6 pb-6 lg:px-10", meta.headerBg)}>
             <div className="absolute right-5 top-5 flex items-center gap-2">
               <button
                 onClick={() => onOpenChange(false)}
@@ -183,7 +183,7 @@ export function AssessmentModal({
           </div>
 
           {/* Body */}
-          <div className="flex-1 space-y-5 overflow-y-auto bg-white px-6 py-5">
+          <div className="flex-1 space-y-5 overflow-y-auto bg-white px-5 py-6 lg:px-10">
             {notice && (
               <div
                 className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm ${
@@ -399,7 +399,7 @@ export function AssessmentModal({
           </div>
 
           {/* Footer actions */}
-          <div className="border-t border-border bg-white px-6 py-4">
+          <div className="border-t border-border bg-white px-5 py-4 lg:px-10">
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 onClick={handleConfirm}
