@@ -262,7 +262,7 @@ export function AssessmentModal({
               </div>
             )}
 
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid gap-y-5 gap-x-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12">
               {/* Assistant summary — left, row 1 */}
               <div className="order-1 lg:col-start-1 lg:row-start-1">
                 <div className="rounded-2xl border border-border bg-white p-4">

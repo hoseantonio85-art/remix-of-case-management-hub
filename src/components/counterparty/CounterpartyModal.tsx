@@ -523,7 +523,7 @@ export function CounterpartyModal({
 
           </div>
 
-          <div className="grid grid-cols-1 gap-6 bg-white px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12">
             <div className="space-y-6 min-w-0">
             {notification && (
               <div
