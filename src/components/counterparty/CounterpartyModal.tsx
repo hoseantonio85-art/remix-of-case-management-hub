@@ -480,7 +480,7 @@ export function CounterpartyModal({
             const tone = getToneForTag(counterparty.tag);
             const styles = toneStyles[tone];
             return (
-              <div className={`relative border-b border-border px-7 pt-6 pb-5 ${styles.gradient}`}>
+              <div className={`relative border-b border-border px-5 pt-6 pb-6 lg:px-10 ${styles.gradient}`}>
                 <button
                   onClick={() => onOpenChange(false)}
                   className="absolute right-5 top-5 rounded-full bg-white/70 p-1.5 text-muted-foreground backdrop-blur hover:bg-white"
@@ -507,7 +507,7 @@ export function CounterpartyModal({
             );
           })()}
 
-          <div className="bg-white px-6 pt-5">
+          <div className="bg-white px-5 pt-6 lg:px-10">
             <AssistantSummaryCard
               onOpen={() => setAssessmentOpen(true)}
               status={assessmentStatus}
@@ -523,7 +523,7 @@ export function CounterpartyModal({
 
           </div>
 
-          <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-5 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12 lg:px-10">
             <div className="space-y-6 min-w-0">
             {notification && (
               <div
