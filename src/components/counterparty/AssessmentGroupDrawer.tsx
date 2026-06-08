@@ -41,14 +41,13 @@ export function AssessmentGroupDrawer({
         </div>
         <h3 className="mt-1 pr-8 text-lg font-semibold text-foreground">{group.title}</h3>
         <p className="mt-1 text-xs text-muted-foreground">{group.description}</p>
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Всего" value={group.total} />
-          <Stat
-            label="Требуют внимания"
-            value={counts.attention}
-          />
+          <Stat label="Требуют внимания" value={counts.attention} />
+          <Stat label="Информационные совпадения" value={counts.info} />
           <Stat label="Без замечаний" value={counts.clear} />
         </div>
+
       </div>
 
       <div className="flex-1 px-6 py-4">
