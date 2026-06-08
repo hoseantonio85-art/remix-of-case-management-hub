@@ -509,22 +509,22 @@ export function CounterpartyModal({
                     }
                   />
                 </div>
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
-                  <DebtCard
-                    label="Просроченная задолженность"
-                    value={`${totalOverdue.toFixed(1)} млн. ₽`}
-                    accent={totalOverdue > 0}
-                  />
-                </div>
               </div>
             );
           })()}
 
 
 
-          <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-5 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12 lg:px-10">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-5 py-6 lg:grid-cols-2 lg:gap-x-12 lg:px-10">
             <div className="space-y-6 min-w-0">
+            <div className="grid grid-cols-2 gap-3">
+              <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
+              <DebtCard
+                label="Просроченная задолженность"
+                value={`${totalOverdue.toFixed(1)} млн. ₽`}
+                accent={totalOverdue > 0}
+              />
+            </div>
             {notification && (
               <div
                 className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm ${
