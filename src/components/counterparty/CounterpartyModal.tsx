@@ -480,7 +480,7 @@ export function CounterpartyModal({
             const tone = getToneForTag(counterparty.tag);
             const styles = toneStyles[tone];
             return (
-              <div className={`relative border-b border-border px-5 pt-6 pb-6 lg:px-10 ${styles.gradient}`}>
+              <div className={`relative px-5 pt-6 pb-6 lg:px-10 ${styles.gradient}`}>
                 <button
                   onClick={() => onOpenChange(false)}
                   className="absolute right-5 top-5 rounded-full bg-white/70 p-1.5 text-muted-foreground backdrop-blur hover:bg-white"
@@ -495,6 +495,20 @@ export function CounterpartyModal({
                 <div className="mt-1 text-sm text-muted-foreground">
                   ИНН {counterparty.inn} · ОГРН {defaultOgrn}
                 </div>
+                <div className="mt-5">
+                  <AssistantSummaryCard
+                    onOpen={() => setAssessmentOpen(true)}
+                    status={assessmentStatus}
+                    confirmedAt={assessmentConfirmedAt}
+                    confirmedBy={ASSESSMENT_USER}
+                    disagreement={assessmentDisagreement}
+                    sourceLabel={
+                      assessment?.source === "manual"
+                        ? "Запущено пользователем"
+                        : "Автоматический мониторинг"
+                    }
+                  />
+                </div>
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
                   <DebtCard
@@ -507,21 +521,7 @@ export function CounterpartyModal({
             );
           })()}
 
-          <div className="bg-white px-5 pt-6 lg:px-10">
-            <AssistantSummaryCard
-              onOpen={() => setAssessmentOpen(true)}
-              status={assessmentStatus}
-              confirmedAt={assessmentConfirmedAt}
-              confirmedBy={ASSESSMENT_USER}
-              disagreement={assessmentDisagreement}
-              sourceLabel={
-                assessment?.source === "manual"
-                  ? "Запущено пользователем"
-                  : "Автоматический мониторинг"
-              }
-            />
 
-          </div>
 
           <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-5 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12 lg:px-10">
             <div className="space-y-6 min-w-0">
@@ -738,7 +738,7 @@ export function CounterpartyModal({
             </div>
 
             {/* Right column: meta */}
-            <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start lg:mt-[40px]">
+            <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
               <RegistrationInfoWidget />
               <DebtSummaryCard
                 steps={steps}
