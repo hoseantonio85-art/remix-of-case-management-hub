@@ -108,15 +108,6 @@ export function AssessmentModal({
     assessment.source === "auto" ? "Автоматический мониторинг" : "Запущено пользователем";
   const savedDisagreement = disagreement;
 
-  const totals = assessment.groups.reduce(
-    (acc, g) => {
-      const c = groupCounts(g);
-      acc.attention += c.attention;
-      acc.detected += c.attention + c.info;
-      return acc;
-    },
-    { attention: 0, detected: 0 },
-  );
 
   const handleConfirm = () => {
     onConfirm();
@@ -183,8 +174,8 @@ export function AssessmentModal({
               )}
             </div>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <HeaderStat label="Критериев выявлено" value={totals.detected} />
-              <HeaderStat label="Требуют внимания" value={totals.attention} accent={totals.attention > 0} />
+              <LimitCard label="Расходные сделки" sublabel="Лимит аванса" value="2,5 млн ₽" />
+              <LimitCard label="Доходные сделки" sublabel="Лимит дебиторской задолженности" value="4,8 млн ₽" />
             </div>
           </div>
 
@@ -507,13 +498,12 @@ export function AssessmentModal({
   );
 }
 
-function HeaderStat({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+function LimitCard({ label, sublabel, value }: { label: string; sublabel: string; value: string }) {
   return (
     <div className="rounded-xl border border-border bg-white px-4 py-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`mt-1 text-lg font-semibold ${accent ? "text-amber-700" : "text-foreground"}`}>
-        {value}
-      </div>
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-[11px] text-muted-foreground/70">{sublabel}</div>
+      <div className="mt-1.5 text-lg font-semibold text-foreground">{value}</div>
     </div>
   );
 }
