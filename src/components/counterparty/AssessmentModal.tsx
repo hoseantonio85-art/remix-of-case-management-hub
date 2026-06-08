@@ -508,6 +508,16 @@ export function AssessmentModal({
   );
 }
 
+function HeaderStat({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+  return (
+    <div className="rounded-xl border border-border bg-white px-4 py-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-lg font-semibold ${accent ? "text-amber-700" : "text-foreground"}`}>
+        {value}
+      </div>
+    </div>
+  );
+
 function pluralCriteria(n: number) {
   const mod10 = n % 10;
   const mod100 = n % 100;
