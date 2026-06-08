@@ -12,6 +12,7 @@ import {
   toneStyles,
 } from "@/lib/assessment-data";
 import { AssessmentGroupDrawer } from "./AssessmentGroupDrawer";
+import { RegistrationInfoWidget, defaultOgrn } from "./RegistrationInfoWidget";
 
 export type AssessmentStatus = "pending" | "confirmed" | "disagreed" | "updated";
 
@@ -161,7 +162,9 @@ export function AssessmentModal({
               {assessment.counterpartyName}
             </h2>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span>{assessment.inn}</span>
+              <span>ИНН {assessment.inn}</span>
+              <span>·</span>
+              <span>ОГРН {defaultOgrn}</span>
               <span>·</span>
               <span>Оценка: {assessment.date}</span>
               <span>·</span>
@@ -283,6 +286,7 @@ export function AssessmentModal({
               {/* What changed — right, spans both rows */}
               <aside className="order-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
                 <div className="space-y-3 lg:sticky lg:top-0">
+                  <RegistrationInfoWidget />
                   <div className="rounded-2xl border border-border bg-white p-4">
                     <div className="flex items-center justify-between">
                       <div>

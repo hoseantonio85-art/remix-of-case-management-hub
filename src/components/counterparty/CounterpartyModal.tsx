@@ -36,6 +36,7 @@ import { riskMeta } from "./risk-meta";
 import { AssistantSummaryCard } from "./AssistantSummaryCard";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "./AssessmentModal";
 import { buildAssessment, type Assessment } from "@/lib/assessment-data";
+import { RegistrationInfoWidget, defaultOgrn } from "./RegistrationInfoWidget";
 
 const priorityBadge: Record<string, { label: string; cls: string }> = {
   high: { label: "Высокий приоритет", cls: "bg-amber-100 text-amber-900" },
@@ -491,7 +492,9 @@ export function CounterpartyModal({
                   {counterparty.tag}
                 </span>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{counterparty.name}</h2>
-                <div className="mt-1 text-sm text-muted-foreground">{counterparty.inn}</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  ИНН {counterparty.inn} · ОГРН {defaultOgrn}
+                </div>
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
                   <DebtCard
@@ -736,6 +739,7 @@ export function CounterpartyModal({
 
             {/* Right column: meta */}
             <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start lg:mt-[40px]">
+              <RegistrationInfoWidget />
               <DebtSummaryCard
                 steps={steps}
                 stepAnim={stepAnim}
