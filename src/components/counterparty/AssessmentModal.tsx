@@ -333,6 +333,8 @@ export function AssessmentModal({
                     </Button>
                   )}
                 </div>
+              </aside>
+
               {/* Groups — left, row 2 */}
               <section className="order-3 lg:col-start-1 lg:row-start-1 space-y-5">
                 <div className="grid grid-cols-2 gap-3">
