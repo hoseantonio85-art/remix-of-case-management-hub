@@ -509,14 +509,6 @@ export function CounterpartyModal({
                     }
                   />
                 </div>
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
-                  <DebtCard
-                    label="Просроченная задолженность"
-                    value={`${totalOverdue.toFixed(1)} млн. ₽`}
-                    accent={totalOverdue > 0}
-                  />
-                </div>
               </div>
             );
           })()}
