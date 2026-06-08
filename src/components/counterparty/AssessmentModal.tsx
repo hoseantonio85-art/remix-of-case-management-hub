@@ -357,14 +357,11 @@ export function AssessmentModal({
                       <button
                         key={g.id}
                         onClick={() => setGroupDrawer(g)}
-                        className="group flex items-start gap-3 rounded-xl border border-border bg-white p-3.5 text-left transition hover:bg-muted/30"
+                        className="group flex items-center gap-3 rounded-lg border border-border bg-white px-3.5 py-3 text-left transition hover:bg-muted/30"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-medium text-foreground">{g.title}</div>
-                          <div className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
-                            {g.description}
-                          </div>
-                          <div className="mt-2 text-[11px] text-muted-foreground">
+                          <div className="mt-1 text-[11px] text-muted-foreground">
                             {g.total} {pluralCriteria(g.total)}
                             {middlePart && (
                               <>
@@ -376,7 +373,7 @@ export function AssessmentModal({
                             {`${counts.clear} без замечаний`}
                           </div>
                         </div>
-                        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
                       </button>
                     );
                   })}
