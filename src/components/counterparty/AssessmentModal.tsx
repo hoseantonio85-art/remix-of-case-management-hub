@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, Sparkles, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,15 @@ const REASONS = [
   "Другое",
 ];
 
-export type Disagreement = { reason?: string; text: string; groups?: string[] };
+export type DisagreementGroup = { groupId: string; groupTitle: string; comment: string };
+export type Disagreement = {
+  reason?: string;
+  text: string;
+  groups?: string[];
+  status?: "draft" | "submitted";
+  groupComments?: DisagreementGroup[];
+  submittedAt?: string;
+};
 
 export function AssessmentModal({
   assessment,
@@ -91,13 +99,12 @@ export function AssessmentModal({
   const [groupDrawer, setGroupDrawer] = useState<AssessmentGroup | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
 
-  // Disagreement (review) inline flow
-  const [disagreeOpen, setDisagreeOpen] = useState(false);
+  // Disagreement (review) inline flow — checkboxes appear directly on group cards.
+  const [disagreeMode, setDisagreeMode] = useState(false);
   const [disagreeGroupIds, setDisagreeGroupIds] = useState<string[]>([]);
-  const [disagreeComment, setDisagreeComment] = useState("");
+  const [disagreeComments, setDisagreeComments] = useState<Record<string, string>>({});
+  const [disagreeErrors, setDisagreeErrors] = useState<Record<string, boolean>>({});
   const [disagreeSubmitted, setDisagreeSubmitted] = useState(false);
-  const [disagreeEditMode, setDisagreeEditMode] = useState(false);
-  const disagreeRef = useRef<HTMLDivElement>(null);
 
   // In-modal reassessment (separate from main-screen flow that asks INN).
   const [isReassessmentRunning, setIsReassessmentRunning] = useState(false);
@@ -121,11 +128,11 @@ export function AssessmentModal({
       setHighlightedChanges(false);
       setExtraChanges([]);
       setProgressStep(0);
-      setDisagreeOpen(false);
+      setDisagreeMode(false);
       setDisagreeGroupIds([]);
-      setDisagreeComment("");
+      setDisagreeComments({});
+      setDisagreeErrors({});
       setDisagreeSubmitted(false);
-      setDisagreeEditMode(false);
     }
   }, [open, assessment?.inn]);
 
@@ -152,51 +159,62 @@ export function AssessmentModal({
     ];
   };
 
-  const scrollToDisagree = () => {
-    window.requestAnimationFrame(() => {
-      disagreeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  };
-
   const handleDisagreeClick = () => {
-    if (disagreeSubmitted) {
-      setDisagreeEditMode(true);
-      scrollToDisagree();
-      return;
-    }
-    setDisagreeOpen(true);
-    scrollToDisagree();
+    setDisagreeMode(true);
   };
 
   const toggleDisagreeGroup = (id: string) => {
     setDisagreeGroupIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
+    setDisagreeErrors((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const setGroupComment = (id: string, value: string) => {
+    setDisagreeComments((prev) => ({ ...prev, [id]: value }));
+    if (value.trim()) {
+      setDisagreeErrors((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const handleSubmitDisagree = () => {
     if (disagreeGroupIds.length === 0) return;
+    const errors: Record<string, boolean> = {};
+    for (const id of disagreeGroupIds) {
+      if (!(disagreeComments[id] ?? "").trim()) errors[id] = true;
+    }
+    if (Object.keys(errors).length > 0) {
+      setDisagreeErrors(errors);
+      return;
+    }
+    const groupTitleById = new Map<string, string>((assessment?.groups ?? []).map((g) => [g.id as string, g.title]));
+    const groupComments: DisagreementGroup[] = disagreeGroupIds.map((id) => ({
+      groupId: id,
+      groupTitle: groupTitleById.get(id) ?? id,
+      comment: (disagreeComments[id] ?? "").trim(),
+    }));
     onDisagree({
-      text: disagreeComment.trim(),
+      text: groupComments.map((g) => `${g.groupTitle}: ${g.comment}`).join("\n"),
       groups: disagreeGroupIds,
+      status: "submitted",
+      groupComments,
+      submittedAt: new Date().toISOString(),
     });
     setDisagreeSubmitted(true);
-    setDisagreeEditMode(false);
-    setDisagreeOpen(true);
+    setDisagreeMode(false);
     setNotice({ tone: "info", text: "Замечания отправлены на пересмотр" });
   };
 
-  const showDisagreeForm =
-    (disagreeOpen && !disagreeSubmitted) || (disagreeSubmitted && disagreeEditMode);
-  const showDisagreeSummary = disagreeSubmitted && !disagreeEditMode;
-
-  const disagreeGroupTitles = useMemo(
-    () =>
-      (assessment?.groups ?? [])
-        .filter((g) => disagreeGroupIds.includes(g.id))
-        .map((g) => g.title),
-    [assessment?.groups, disagreeGroupIds],
-  );
 
   if (!assessment) return null;
 
@@ -449,185 +467,126 @@ export function AssessmentModal({
                 <div className="grid grid-cols-1 gap-2.5">
                   {assessment.groups.map((g) => {
                     const counts = groupCounts(g);
+                    const checked = disagreeGroupIds.includes(g.id);
                     const isUnderReview =
-                      disagreeSubmitted && disagreeGroupIds.includes(g.id);
+                      disagreeSubmitted && !disagreeMode && disagreeGroupIds.includes(g.id);
+                    const submittedComment = disagreeComments[g.id]?.trim();
+                    const hasError = disagreeErrors[g.id];
                     return (
-                      <button
+                      <div
                         key={g.id}
-                        onClick={() => setGroupDrawer(g)}
-                        className="group flex items-center gap-3 rounded-lg border border-border bg-white px-3 py-3 text-left transition hover:bg-muted/30"
+                        className={cn(
+                          "rounded-lg border bg-white transition",
+                          disagreeMode && checked
+                            ? "border-primary/30 bg-primary/5"
+                            : "border-border",
+                        )}
                       >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <div className="text-sm font-medium text-foreground">{g.title}</div>
-                            {isUnderReview && (
-                              <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-700">
-                                На пересмотре
-                              </span>
-                            )}
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setGroupDrawer(g)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setGroupDrawer(g);
+                            }
+                          }}
+                          className="group flex cursor-pointer items-center gap-3 px-3 py-3 text-left hover:bg-muted/30"
+                        >
+                          {disagreeMode && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex shrink-0 items-center"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={() => toggleDisagreeGroup(g.id)}
+                                aria-label={`Выбрать группу ${g.title}`}
+                              />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="text-sm font-medium text-foreground">{g.title}</div>
+                              {isUnderReview && (
+                                <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-700">
+                                  На пересмотре
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                              <CountPill kind="attention" count={counts.attention} />
+                              {counts.info > 0 && <CountPill kind="info" count={counts.info} />}
+                              <CountPill kind="clear" count={counts.clear} />
+                            </div>
                           </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            <CountPill
-                              kind="attention"
-                              count={counts.attention}
-                            />
-                            {counts.info > 0 && (
-                              <CountPill kind="info" count={counts.info} />
-                            )}
-                            <CountPill kind="clear" count={counts.clear} />
-                          </div>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
                         </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
-                      </button>
+
+                        {disagreeMode && checked && (
+                          <div
+                            className="border-t border-primary/20 px-3 py-3"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <label className="text-[11px] font-medium text-foreground">
+                              Комментарий к группе
+                            </label>
+                            <Textarea
+                              value={disagreeComments[g.id] ?? ""}
+                              onChange={(e) => setGroupComment(g.id, e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              onFocus={(e) => e.stopPropagation()}
+                              placeholder="Опишите, с чем именно вы не согласны по этой группе."
+                              className={cn(
+                                "mt-1.5 min-h-[88px] resize-y",
+                                hasError && "border-rose-400 focus-visible:ring-rose-300",
+                              )}
+                              rows={3}
+                            />
+                            {hasError && (
+                              <div className="mt-1 text-[11px] text-rose-600">
+                                Добавьте комментарий по выбранной группе.
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {!disagreeMode && isUnderReview && submittedComment && (
+                          <div className="border-t border-border px-3 py-2.5 text-[12px] text-muted-foreground">
+                            <span className="font-medium text-foreground">Комментарий:</span>{" "}
+                            {submittedComment}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
                 </div>
               </section>
             </div>
-
-
-            {/* Disagreement inline block */}
-            {(disagreeOpen || disagreeSubmitted) && (
-              <section
-                ref={disagreeRef}
-                className="rounded-2xl border border-border bg-white p-5"
-              >
-                {showDisagreeForm && (
-                  <>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h4 className="text-sm font-semibold text-foreground">
-                          Несогласие с результатами оценки
-                        </h4>
-                        <p className="mt-1 text-[12px] text-muted-foreground">
-                          Выберите группы оценки, с выводами по которым вы не согласны.
-                        </p>
-                      </div>
-                      {!disagreeSubmitted && (
-                        <button
-                          onClick={() => setDisagreeOpen(false)}
-                          className="rounded p-1 text-muted-foreground hover:bg-muted"
-                          aria-label="Закрыть"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {assessment.groups.map((g) => {
-                        const checked = disagreeGroupIds.includes(g.id);
-                        return (
-                          <label
-                            key={g.id}
-                            className={cn(
-                              "flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition",
-                              checked
-                                ? "border-primary/40 bg-primary/5"
-                                : "border-border bg-white hover:bg-muted/30",
-                            )}
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={() => toggleDisagreeGroup(g.id)}
-                              className="mt-0.5"
-                            />
-                            <span className="leading-snug text-foreground">{g.title}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-
-                    {disagreeGroupIds.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <label className="text-xs font-medium text-foreground">Комментарий</label>
-                        <Textarea
-                          value={disagreeComment}
-                          onChange={(e) => setDisagreeComment(e.target.value)}
-                          placeholder="Опишите причину несогласия или укажите дополнительные сведения."
-                          className="min-h-[112px] resize-y"
-                          rows={4}
-                        />
-                        <div className="flex justify-end">
-                          <Button
-                            onClick={handleSubmitDisagree}
-                            className="h-10 rounded-full px-5 text-sm font-medium"
-                          >
-                            <Send className="h-4 w-4" /> Отправить на пересмотр
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {showDisagreeSummary && (
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2.5">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600">
-                        <CheckCircle2 className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-foreground">
-                          Замечания отправлены
-                        </div>
-                        <p className="mt-1 text-[12px] text-muted-foreground">
-                          Вы оспорили результаты оценки по выбранным группам. Комментарий передан на повторную проверку.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-border bg-slate-50/60 p-3.5 text-sm">
-                      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                        Выбрано групп: {disagreeGroupIds.length}
-                      </div>
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {disagreeGroupTitles.map((t) => (
-                          <span
-                            key={t}
-                            className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      {disagreeComment.trim() && (
-                        <>
-                          <div className="mt-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                            Комментарий
-                          </div>
-                          <div className="mt-1 text-sm text-foreground">«{disagreeComment.trim()}»</div>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex justify-end">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setDisagreeEditMode(true);
-                          scrollToDisagree();
-                        }}
-                        className="h-10 rounded-full px-5 text-sm font-medium"
-                      >
-                        Изменить замечания
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
           </div>
 
           {/* Footer actions */}
           <div className="shrink-0 border-t border-border bg-white px-5 py-4 lg:px-10">
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="outline"
-                onClick={handleDisagreeClick}
-                className="h-12 flex-1 rounded-full text-sm font-medium"
-              >
-                Не согласен
-              </Button>
+              {disagreeMode ? (
+                <Button
+                  onClick={handleSubmitDisagree}
+                  disabled={disagreeGroupIds.length === 0}
+                  className="h-12 flex-1 rounded-full text-sm font-medium"
+                >
+                  <Send className="h-4 w-4" /> Отправить на пересмотр
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleDisagreeClick}
+                  className="h-12 flex-1 rounded-full text-sm font-medium"
+                >
+                  Не согласен
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={handleDownload}
@@ -637,6 +596,7 @@ export function AssessmentModal({
               </Button>
             </div>
           </div>
+
 
 
 
