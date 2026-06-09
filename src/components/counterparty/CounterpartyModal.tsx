@@ -4,12 +4,6 @@ import { cn } from "@/lib/utils";
 import { largeModalContentClass } from "@/lib/modal-styles";
 import { Button } from "@/components/ui/button";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   ShieldCheck,
   ChevronRight,
   ChevronDown,
@@ -128,13 +122,17 @@ export function CounterpartyModal({
   const confirmed = useMemo(() => risks.filter((r) => r.status === "confirmed"), [risks]);
   const dismissed = useMemo(() => risks.filter((r) => r.status === "dismissed"), [risks]);
   const decidedCount = confirmed.length + dismissed.length + verification.length;
-  const totalOverdue = contracts.reduce((acc, c) => acc + c.overdue, 0);
+  const totalOverdue = contracts.reduce((acc, c) => {
+    const value = Number(c?.overdue ?? 0);
+    return acc + (Number.isFinite(value) ? value : 0);
+  }, 0);
+  const totalOverdueLabel = `${totalOverdue.toFixed(1)} млн. ₽`;
   const currentStage = steps.find((s) => s.status === "current");
   const allMeasures = confirmed.flatMap((r) => r.decision?.measures ?? []);
 
   const overdueStartDate = useMemo(() => {
     const dates = contracts
-      .flatMap((c) => c.overdueHistory.map((h) => h.date))
+      .flatMap((c) => (c.overdueHistory ?? []).map((h) => h.date))
       .filter(Boolean);
     if (dates.length === 0) return "";
     const parsed = dates
@@ -151,7 +149,11 @@ export function CounterpartyModal({
   }, [contracts]);
 
   const maxOverdueDays = useMemo(
-    () => contracts.reduce((m, c) => Math.max(m, c.overdueDays), 0),
+    () =>
+      contracts.reduce((m, c) => {
+        const value = Number(c?.overdueDays ?? 0);
+        return Math.max(m, Number.isFinite(value) ? value : 0);
+      }, 0),
     [contracts],
   );
 
@@ -375,7 +377,7 @@ export function CounterpartyModal({
       date: new Date().toLocaleDateString("ru-RU"),
       action: "Переведен этап",
       step: next.title,
-      user: counterparty?.risks[0]?.decision?.responsible ?? "Михайлова Екатерина",
+      user: counterparty?.risks?.[0]?.decision?.responsible ?? "Михайлова Екатерина",
     });
   };
 
@@ -436,9 +438,9 @@ export function CounterpartyModal({
         c.id === id
           ? {
               ...c,
-              overdue: c.overdue + record.amount,
-              overdueDays: Math.max(c.overdueDays, record.days),
-              overdueHistory: [record, ...c.overdueHistory],
+              overdue: Number(c.overdue ?? 0) + Number(record.amount ?? 0),
+              overdueDays: Math.max(Number(c.overdueDays ?? 0), Number(record.days ?? 0)),
+              overdueHistory: [record, ...(c.overdueHistory ?? [])],
             }
           : c,
       ),
@@ -447,13 +449,20 @@ export function CounterpartyModal({
       prev && prev.id === id
         ? {
             ...prev,
-            overdue: prev.overdue + record.amount,
-            overdueDays: Math.max(prev.overdueDays, record.days),
-            overdueHistory: [record, ...prev.overdueHistory],
+            overdue: Number(prev.overdue ?? 0) + Number(record.amount ?? 0),
+            overdueDays: Math.max(Number(prev.overdueDays ?? 0), Number(record.days ?? 0)),
+            overdueHistory: [record, ...(prev.overdueHistory ?? [])],
           }
         : prev,
     );
   };
+
+  const problemIndicators = getCounterpartyProblemIndicators(counterparty)
+    .map((key) => {
+      const meta = problemIndicatorMeta[key];
+      return meta && meta.icon && meta.label ? { key, meta } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -478,30 +487,19 @@ export function CounterpartyModal({
                   <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${styles.badge}`}>
                     {counterparty.tag}
                   </span>
-                  <TooltipProvider delayDuration={150}>
-                    {getCounterpartyProblemIndicators(counterparty)
-                      .map((k) => ({ k, m: problemIndicatorMeta[k] }))
-                      .filter((x) => Boolean(x.m))
-                      .map(({ k, m }) => {
-                        const Icon = m.icon;
-                        return (
-                          <Tooltip key={k}>
-                            <TooltipTrigger asChild>
-                              <span
-                                aria-label={m.label}
-                                title={m.label}
-                                className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${m.activeBorder} ${m.activeBg} transition hover:brightness-95`}
-                              >
-                                <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom">
-                              <p className="text-xs">{m.label}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                  </TooltipProvider>
+                  {problemIndicators.map((item) => {
+                    const Icon = item.meta.icon;
+                    return (
+                      <span
+                        key={item.key}
+                        aria-label={item.meta.label}
+                        title={item.meta.label}
+                        className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${item.meta.activeBorder} ${item.meta.activeBg} transition hover:brightness-95`}
+                      >
+                        <Icon className={`h-3.5 w-3.5 ${item.meta.iconColor}`} />
+                      </span>
+                    );
+                  })}
                 </div>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{counterparty.name}</h2>
                 <div className="mt-1 text-sm text-muted-foreground">
