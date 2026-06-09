@@ -360,20 +360,40 @@ export default function Index() {
     return byCategory.filter((c) => c.risks.some((r) => r.type === riskFilter));
   }, [byCategory, riskFilter, showRiskChips]);
 
-  // Donut data driven entirely by selected tiles
+  // Donut data: overview when no tile selected, drilldown by overdue buckets otherwise.
   const donutData = useMemo(() => {
     if (selectedTiles.size === 0) {
       return { amount: "4,7", segments: defaultSegments };
     }
-    const segs: Segment[] = [];
+    // Pick the "leading" category for color palette: prefer overdue_risk > overdue > risk > no_risk
+    const priority: CategoryKey[] = ["overdue_risk", "overdue", "risk", "no_risk"];
+    const leading = priority.find((k) => selectedTiles.has(k))!;
+    const palette = categoryPalette[leading].segments;
+
+    // Aggregate breakdown buckets across all selected categories, keyed by label.
+    const buckets = new Map<string, { key: string; label: string; value: number; color: string }>();
     let total = 0;
     for (const t of tiles) {
       if (!selectedTiles.has(t.key)) continue;
-      const val = parseFloat(categoryPalette[t.key].amount.replace(",", "."));
-      total += val;
-      segs.push({ key: t.key, label: t.title, value: val, color: t.dot });
+      total += parseFloat(categoryPalette[t.key].amount.replace(",", "."));
+      for (const seg of categoryPalette[t.key].segments) {
+        const existing = buckets.get(seg.label);
+        if (existing) {
+          existing.value += seg.value;
+        } else {
+          // Use color from the leading palette so the whole ring lives in one color family.
+          const leadSeg = palette.find((p) => p.label === seg.label) ?? seg;
+          buckets.set(seg.label, {
+            key: seg.label,
+            label: seg.label,
+            value: seg.value,
+            color: leadSeg.color,
+          });
+        }
+      }
     }
-    return { amount: total.toFixed(1).replace(".", ","), segments: segs };
+    const segments = Array.from(buckets.values()).filter((s) => s.value > 0);
+    return { amount: total.toFixed(1).replace(".", ","), segments };
   }, [selectedTiles]);
 
   const toggleTile = (key: CategoryKey) => {
