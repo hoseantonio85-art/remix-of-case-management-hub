@@ -235,7 +235,7 @@ type RiskChipKey = "all" | RiskType;
 
 export default function Index() {
   const [active, setActive] = useState<Counterparty | null>(null);
-  const [filter, setFilter] = useState<CategoryKey | null>(null);
+  const [selectedTiles, setSelectedTiles] = useState<Set<CategoryKey>>(new Set());
   const [riskFilter, setRiskFilter] = useState<RiskChipKey>("all");
   const [processStage, setProcessStage] = useState<ProcessStage | null>(null);
   const [processDrawerOpen, setProcessDrawerOpen] = useState(false);
@@ -291,7 +291,6 @@ export default function Index() {
     if (!o) {
       setManualDisagreement(null);
       if (manualFlowTarget) {
-        // Manual flow: chain to CounterpartyModal
         setManualFlowCpOpen(true);
       }
     }
@@ -313,14 +312,11 @@ export default function Index() {
           description: `ИНН ${inn} найден в рабочем списке`,
         });
       }
-      // cleanup
       setManualFlowTarget(null);
       setManualFlowIsNew(false);
       setManualAssessment(null);
     }
   };
-
-
 
   const processCounts = useMemo(() => {
     const map = { monitoring: 0, risk_confirmation: 0, settlement: 0, writeoff: 0 } as Record<ProcessStage, number>;
@@ -339,11 +335,14 @@ export default function Index() {
   }, [processStage]);
 
   const byCategory = useMemo(() => {
-    if (!filter) return byProcess;
-    return byProcess.filter((c) => c.status === filter);
-  }, [byProcess, filter]);
+    if (selectedTiles.size === 0) return byProcess;
+    return byProcess.filter((c) => selectedTiles.has(c.status));
+  }, [byProcess, selectedTiles]);
 
-  const showRiskChips = filter !== "no_risk" && filter !== "overdue";
+  const showRiskChips = !(
+    selectedTiles.size === 1 &&
+    (selectedTiles.has("no_risk") || selectedTiles.has("overdue"))
+  );
 
   const riskCounts = useMemo(() => {
     const map: Record<string, number> = { all: byCategory.length };
@@ -361,13 +360,55 @@ export default function Index() {
     return byCategory.filter((c) => c.risks.some((r) => r.type === riskFilter));
   }, [byCategory, riskFilter, showRiskChips]);
 
+  // Donut data driven entirely by selected tiles
+  const donutData = useMemo(() => {
+    if (selectedTiles.size === 0) {
+      return { amount: "4,7", segments: defaultSegments };
+    }
+    const segs: Segment[] = [];
+    let total = 0;
+    for (const t of tiles) {
+      if (!selectedTiles.has(t.key)) continue;
+      const val = parseFloat(categoryPalette[t.key].amount.replace(",", "."));
+      total += val;
+      segs.push({ key: t.key, label: t.title, value: val, color: t.dot });
+    }
+    return { amount: total.toFixed(1).replace(".", ","), segments: segs };
+  }, [selectedTiles]);
+
+  const toggleTile = (key: CategoryKey) => {
+    if (allowedCategories && !allowedCategories.has(key)) return;
+    setSelectedTiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        // Cannot remove the last selected tile while a process is active
+        if (allowedCategories && next.size === 1) return prev;
+        next.delete(key);
+      } else {
+        if (allowedCategories) {
+          // multi-select within process
+          next.add(key);
+        } else {
+          // single-select like before
+          next.clear();
+          next.add(key);
+        }
+      }
+      return next;
+    });
+    setRiskFilter("all");
+  };
+
   const applyProcessStage = (stage: ProcessStage | null) => {
     setProcessStage(stage);
-    if (stage && filter && !processMeta[stage].allowedCategories.includes(filter)) {
-      setFilter(null);
-      setRiskFilter("all");
+    if (stage) {
+      setSelectedTiles(new Set(processMeta[stage].allowedCategories));
+    } else {
+      setSelectedTiles(new Set());
     }
+    setRiskFilter("all");
   };
+
 
 
   return (
@@ -476,21 +517,18 @@ export default function Index() {
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto]">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {tiles.map((t) => {
-                    const isActive = filter === t.key;
+                    const isActive = selectedTiles.has(t.key);
                     const disabled = !!allowedCategories && !allowedCategories.has(t.key);
+                    const dimmed = selectedTiles.size > 0 && !isActive && !disabled;
                     return (
                       <button
                         key={t.key}
                         disabled={disabled}
-                        onClick={() => {
-                          if (disabled) return;
-                          setFilter(isActive ? null : t.key);
-                          setRiskFilter("all");
-                        }}
+                        onClick={() => toggleTile(t.key)}
                         className={`rounded-2xl px-4 py-4 text-left transition ${
                           isActive
                             ? `${t.bg.replace("/60", "")} ring-2 ${t.ring} shadow-md brightness-105 saturate-150`
-                            : `${t.bg} ring-1 ring-inset ring-transparent hover:ring-2 ${filter ? "opacity-60" : ""}`
+                            : `${t.bg} ring-1 ring-inset ring-transparent hover:ring-2 ${dimmed ? "opacity-60" : ""}`
                         } ${disabled ? "!opacity-40 !cursor-not-allowed hover:ring-0" : ""}`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -511,7 +549,7 @@ export default function Index() {
 
                 <div className="flex items-center gap-6">
                   <ul className="space-y-2 text-sm">
-                    {(filter ? categoryPalette[filter].segments : defaultSegments).map((s) => (
+                    {donutData.segments.map((s) => (
                       <li key={s.key} className="flex items-center gap-2">
                         <span
                           className="inline-block h-2 w-2 rounded-full"
@@ -521,11 +559,9 @@ export default function Index() {
                       </li>
                     ))}
                   </ul>
-                  <Donut
-                    amount={filter ? categoryPalette[filter].amount : "4,7"}
-                    segments={filter ? categoryPalette[filter].segments : defaultSegments}
-                  />
+                  <Donut amount={donutData.amount} segments={donutData.segments} />
                 </div>
+
               </div>
             </div>
 
@@ -590,12 +626,15 @@ export default function Index() {
               </div>
             )}
 
-            {filter && (
-              <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-                Фильтр: <b className="text-foreground">{tiles.find((t) => t.key === filter)?.title}</b>
+            {selectedTiles.size > 0 && !processStage && (
+              <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                Фильтр:{" "}
+                <b className="text-foreground">
+                  {tiles.filter((t) => selectedTiles.has(t.key)).map((t) => t.title).join(", ")}
+                </b>
                 <button
                   className="rounded-full border border-border bg-white px-2 py-0.5 text-[11px] hover:bg-accent"
-                  onClick={() => setFilter(null)}
+                  onClick={() => setSelectedTiles(new Set())}
                 >
                   Сбросить
                 </button>
