@@ -57,7 +57,7 @@ export const processMeta: Record<ProcessStage, ProcessMeta> = {
     icon: Scale,
     allowedCategories: ["overdue", "overdue_risk"],
     accentBg: "bg-orange-50",
-    accentText: "text-orange-700",
+    accentText: "text-orange-600",
     accentBorder: "border-orange-200",
     selectedBorder: "border-orange-400",
     selectedBg: "bg-orange-50/60",
