@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { counterparties, type Counterparty, type RiskType, type ProcessStage } from "@/lib/mock-data";
 import { CounterpartyModal } from "@/components/counterparty/CounterpartyModal";
-import { riskMeta, allChipMeta, riskOrder } from "@/components/counterparty/risk-meta";
+import { riskMeta, allChipMeta } from "@/components/counterparty/risk-meta";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "@/components/counterparty/AssessmentModal";
 import { buildAssessment, type Assessment } from "@/lib/assessment-data";
 import { Button } from "@/components/ui/button";
@@ -231,7 +231,32 @@ function SidebarItem({
   );
 }
 
-type RiskChipKey = "all" | RiskType;
+type RiskChipKey = "all" | "bankruptcy" | "group" | "negative";
+
+const NEGATIVE_RISK_TYPES: RiskType[] = [
+  "Ухудшилось финансовое состояние",
+  "Уголовное дело",
+  "Ограничения деятельности",
+  "Административные нарушения",
+];
+
+const problemChips: { key: Exclude<RiskChipKey, "all">; meta: typeof riskMeta[RiskType]; matches: (c: Counterparty) => boolean }[] = [
+  {
+    key: "bankruptcy",
+    meta: { ...riskMeta["Банкротство / ликвидация"], label: "Банкротство / ликвидация", short: "Банкротство / ликвидация" },
+    matches: (c) => c.risks.some((r) => r.type === "Банкротство / ликвидация"),
+  },
+  {
+    key: "group",
+    meta: { ...riskMeta["Неисполнение контракта группы"], label: "Неисполнение контракта группы", short: "Неисполнение контракта группы" },
+    matches: (c) => c.risks.some((r) => r.type === "Неисполнение контракта группы"),
+  },
+  {
+    key: "negative",
+    meta: { ...riskMeta["Ухудшилось финансовое состояние"], label: "Наличие негативных факторов", short: "Наличие негативных факторов" },
+    matches: (c) => c.risks.some((r) => NEGATIVE_RISK_TYPES.includes(r.type)),
+  },
+];
 
 export default function Index() {
   const [active, setActive] = useState<Counterparty | null>(null);
@@ -346,18 +371,17 @@ export default function Index() {
 
   const riskCounts = useMemo(() => {
     const map: Record<string, number> = { all: byCategory.length };
-    for (const c of byCategory) {
-      const types = new Set(c.risks.map((r) => r.type));
-      types.forEach((t) => {
-        map[t] = (map[t] ?? 0) + 1;
-      });
+    for (const chip of problemChips) {
+      map[chip.key] = byCategory.filter(chip.matches).length;
     }
     return map;
   }, [byCategory]);
 
   const filtered = useMemo(() => {
     if (!showRiskChips || riskFilter === "all") return byCategory;
-    return byCategory.filter((c) => c.risks.some((r) => r.type === riskFilter));
+    const chip = problemChips.find((c) => c.key === riskFilter);
+    if (!chip) return byCategory;
+    return byCategory.filter(chip.matches);
   }, [byCategory, riskFilter, showRiskChips]);
 
   // Donut data:
@@ -609,8 +633,8 @@ export default function Index() {
 
             {showRiskChips && (
               <div className="mb-5 flex flex-wrap gap-2">
-                {(["all", ...riskOrder] as RiskChipKey[]).map((key) => {
-                  const meta = key === "all" ? allChipMeta : riskMeta[key as RiskType];
+                {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
+                  const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
                   const Icon = meta.icon;
                   const count = riskCounts[key] ?? 0;
                   const isActive = riskFilter === key;
