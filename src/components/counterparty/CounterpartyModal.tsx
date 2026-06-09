@@ -491,9 +491,24 @@ export function CounterpartyModal({
                 >
                   <X className="h-4 w-4" />
                 </button>
-                <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${styles.badge}`}>
-                  {counterparty.tag}
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${styles.badge}`}>
+                    {counterparty.tag}
+                  </span>
+                  {getCounterpartyProblemIndicators(counterparty).map((k) => {
+                    const m = problemIndicatorMeta[k];
+                    const Icon = m.icon;
+                    return (
+                      <span
+                        key={k}
+                        title={m.label}
+                        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border ${m.activeBorder} ${m.activeBg}`}
+                      >
+                        <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
+                      </span>
+                    );
+                  })}
+                </div>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{counterparty.name}</h2>
                 <div className="mt-1 text-sm text-muted-foreground">
                   ИНН {counterparty.inn} · ОГРН {defaultOgrn} ·{" "}
