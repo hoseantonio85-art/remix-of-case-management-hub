@@ -49,6 +49,15 @@ const stateMeta: Record<AssessmentStatus, StateMeta> = {
     Icon: RotateCw,
     text: "Оценка обновлена по запущенному ИНН. Обнаружены новые факторы за последний период. Проверьте результат и подтвердите или оставьте комментарий к несогласию.",
   },
+  review: {
+    badgeLabel: "Оценка на пересмотре",
+    badgeCls: "bg-violet-50 text-violet-700 border-violet-200",
+    borderCls: "border-violet-200",
+    iconBg: "bg-violet-50",
+    iconText: "text-violet-700",
+    Icon: RotateCw,
+    text: "По оценке отправлены замечания. Выбранные группы переданы на повторную проверку.",
+  },
 };
 
 export function AssistantSummaryCard({
