@@ -748,9 +748,6 @@ export default function Index() {
         </Button>
       </div>
 
-          </div>
-        </main>
-      </div>
 
       <CounterpartyModal
         counterparty={active}
