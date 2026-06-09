@@ -192,12 +192,14 @@ export function AssessmentModal({
                   <Sparkles className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    NORM AI · Резюме оценки
+                  <span className="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700">
+                    Резолюция: не заключать сделки
+                  </span>
+                  <div className="mt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    NORM AI · Вывод по оценке
                   </div>
-                  <p className="mt-1 text-sm leading-snug text-foreground">{assessment.summary}</p>
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    Выявленные критерии могут быть использованы как основание для сигналов риска.
+                  <p className="mt-1 text-sm leading-snug text-foreground">
+                    Я проверил контрагента по 43 критериям благонадёжности. Сейчас не рекомендую заключать новые сделки: выявлены критичные маркеры по юридическому статусу, признаки налоговой задолженности и повышенная доля вычитаемого НДС. Дополнительно есть репутационные и судебные факторы, которые требуют проверки перед согласованием лимитов. Сначала разберите критерии в группах «Юридический статус и правоспособность», «Финансы и налоги» и «Судебная нагрузка и репутация», затем подтвердите или оспорьте оценку.
                   </p>
                 </div>
               </div>

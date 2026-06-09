@@ -33,7 +33,7 @@ import {
 import { stepMetaByTitle } from "@/lib/debt-process";
 import { getToneForTag, toneStyles } from "./header-theme";
 import { riskMeta } from "./risk-meta";
-import { AssistantSummaryCard } from "./AssistantSummaryCard";
+import { ResolutionCard } from "./ResolutionCard";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "./AssessmentModal";
 import { buildAssessment, type Assessment } from "@/lib/assessment-data";
 import { defaultOgrn } from "./RegistrationInfoWidget";
@@ -504,20 +504,6 @@ export function CounterpartyModal({
                     Подробнее
                   </button>
                 </div>
-                <div className="mt-5">
-                  <AssistantSummaryCard
-                    onOpen={() => setAssessmentOpen(true)}
-                    status={assessmentStatus}
-                    confirmedAt={assessmentConfirmedAt}
-                    confirmedBy={ASSESSMENT_USER}
-                    disagreement={assessmentDisagreement}
-                    sourceLabel={
-                      assessment?.source === "manual"
-                        ? "Запущено пользователем"
-                        : "Автоматический мониторинг"
-                    }
-                  />
-                </div>
               </div>
             );
           })()}
@@ -526,6 +512,11 @@ export function CounterpartyModal({
 
           <div className="grid grid-cols-1 gap-y-6 gap-x-6 bg-white px-5 py-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-12 lg:px-10">
             <div className="space-y-6 min-w-0">
+            <ResolutionCard
+              title="Рекомендуется не заключать новые сделки"
+              description="По оценке благонадёжности выявлены критичные и финансовые маркеры. До проверки спорных критериев заключение новых сделок нежелательно."
+              onDetailsClick={() => setAssessmentOpen(true)}
+            />
             <div className="grid grid-cols-2 gap-3">
               <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
               <DebtCard
