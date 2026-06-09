@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { X, Sparkles, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { largeModalContentClass } from "@/lib/modal-styles";
 import {
@@ -15,7 +15,7 @@ import { AssessmentGroupDrawer } from "./AssessmentGroupDrawer";
 import { defaultOgrn } from "./RegistrationInfoWidget";
 import { RegistrationInfoDrawer } from "./RegistrationInfoDrawer";
 
-export type AssessmentStatus = "pending" | "confirmed" | "disagreed" | "updated";
+export type AssessmentStatus = "pending" | "confirmed" | "disagreed" | "updated" | "review";
 
 const statusMeta: Record<
   AssessmentStatus,
