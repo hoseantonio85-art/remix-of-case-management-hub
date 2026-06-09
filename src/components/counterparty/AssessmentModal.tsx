@@ -186,20 +186,19 @@ export function AssessmentModal({
                 Подробнее
               </button>
             </div>
-            <div className="mt-5 rounded-2xl border border-rose-100/70 bg-gradient-to-br from-white via-rose-50/35 to-amber-50/30 p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                  <Sparkles className="h-4 w-4" />
+            <div className="mt-5 rounded-3xl bg-gradient-to-r from-blue-100 via-violet-100 to-emerald-100 p-[1.5px]">
+              <div className="flex items-start gap-4 rounded-[22px] bg-white px-6 py-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-600">
+                  <Sparkles className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-50 to-amber-50 px-3 py-1 text-xs font-semibold text-rose-700">
-                    <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
-                    Не заключать сделки
-                  </span>
-                  <div className="mt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Вывод NORM AI
                   </div>
-                  <p className="mt-1.5 text-sm leading-snug text-foreground">
+                  <div className="mt-1 text-lg font-semibold text-slate-900">
+                    Не заключать сделки
+                  </div>
+                  <p className="mt-2 text-sm leading-snug text-muted-foreground">
                     Проверка по 43 критериям выявила несколько маркеров, которые блокируют безопасное согласование сделки: ограничения ФНС по счетам, налоговая задолженность и повышенная доля вычитаемого НДС. Дополнительно есть судебные и репутационные факторы, поэтому сначала стоит разобрать группы «Юридический статус», «Финансы и налоги» и «Судебная нагрузка».
                   </p>
                 </div>

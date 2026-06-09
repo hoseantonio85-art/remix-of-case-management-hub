@@ -17,10 +17,7 @@ export function ResolutionCard({
           <AlertTriangle className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-medium uppercase tracking-wide text-rose-700/80">
-            Резолюция
-          </div>
-          <div className="mt-1 text-base font-semibold leading-snug text-foreground">
+          <div className="text-base font-semibold leading-snug text-foreground">
             {title}
           </div>
           <p className="mt-1.5 text-xs leading-snug text-muted-foreground">
