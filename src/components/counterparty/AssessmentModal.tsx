@@ -139,9 +139,11 @@ export function AssessmentModal({
 
   if (!assessment) return null;
 
-  const meta = statusMeta[status];
-  const sourceLabel =
+  const effectiveStatus: AssessmentStatus = reassessmentCompleted ? "updated" : status;
+  const meta = statusMeta[effectiveStatus];
+  const baseSourceLabel =
     assessment.source === "auto" ? "Автоматический мониторинг" : "Запущено пользователем";
+  const sourceLabel = reassessmentCompleted ? "Запущено пользователем · только что" : baseSourceLabel;
   const savedDisagreement = disagreement;
 
 
