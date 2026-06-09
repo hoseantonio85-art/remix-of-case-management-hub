@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info, RefreshCw, Loader2 } from "lucide-react";
+import { X, Sparkles, CheckCircle2, AlertTriangle, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,6 @@ import {
   type Assessment,
   type AssessmentGroup,
   groupCounts,
-  toneStyles,
 } from "@/lib/assessment-data";
 import { AssessmentGroupDrawer } from "./AssessmentGroupDrawer";
 import { defaultOgrn } from "./RegistrationInfoWidget";
@@ -308,17 +307,23 @@ export function AssessmentModal({
                         </div>
                       ) : (
                         <ul className="divide-y divide-border">
-                          {assessment.changes.map((c, i) => (
-                            <li key={i} className="flex items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
-                              <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${toneStyles[c.tone].dot}`} />
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs leading-snug text-foreground">{c.text}</div>
-                                <div className="mt-0.5 text-[10px] text-muted-foreground">
-                                  {toneLabel[c.tone]}
+                          {assessment.changes.map((c, i) => {
+                            const Ico = changeIcon[c.tone];
+                            const cls = changeIconClass[c.tone];
+                            return (
+                              <li key={i} className="flex items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
+                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${cls.bg}`}>
+                                  <Ico className={`h-3.5 w-3.5 ${cls.text}`} />
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs leading-snug text-foreground">{c.text}</div>
+                                  <div className="mt-0.5 text-[10px] text-muted-foreground">
+                                    {toneLabel[c.tone]}
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          ))}
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
                     </div>
@@ -355,31 +360,23 @@ export function AssessmentModal({
                 <div className="grid grid-cols-1 gap-2.5">
                   {assessment.groups.map((g) => {
                     const counts = groupCounts(g);
-                    const hasAttention = counts.attention > 0;
-                    const hasInfo = counts.info > 0;
-                    const middlePart = hasAttention
-                      ? `${counts.attention} требуют внимания`
-                      : hasInfo
-                        ? `${counts.info} информационных совпадений`
-                        : null;
                     return (
                       <button
                         key={g.id}
                         onClick={() => setGroupDrawer(g)}
-                        className="group flex items-center gap-3 rounded-lg border border-border bg-white px-3.5 py-3 text-left transition hover:bg-muted/30"
+                        className="group flex items-center gap-3 rounded-lg border border-border bg-white px-3.5 py-3.5 text-left transition hover:bg-muted/30"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-medium text-foreground">{g.title}</div>
-                          <div className="mt-1 text-[11px] text-muted-foreground">
-                            {g.total} {pluralCriteria(g.total)}
-                            {middlePart && (
-                              <>
-                                {" · "}
-                                {middlePart}
-                              </>
+                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                            <CountPill
+                              kind="attention"
+                              count={counts.attention}
+                            />
+                            {counts.info > 0 && (
+                              <CountPill kind="info" count={counts.info} />
                             )}
-                            {" · "}
-                            {`${counts.clear} без замечаний`}
+                            <CountPill kind="clear" count={counts.clear} />
                           </div>
                         </div>
                         <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
@@ -519,10 +516,43 @@ function LimitCard({ label, sublabel, value }: { label: string; sublabel: string
 
 
 
-function pluralCriteria(n: number) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return "критерий";
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "критерия";
-  return "критериев";
+const pillStyles: Record<"attention" | "info" | "clear", { bg: string; icon: string; num: string }> = {
+  attention: { bg: "bg-rose-50", icon: "text-rose-500", num: "text-rose-700" },
+  info: { bg: "bg-amber-50", icon: "text-amber-600", num: "text-amber-700" },
+  clear: { bg: "bg-emerald-50", icon: "text-emerald-600", num: "text-emerald-700" },
+};
+
+const pillIcon: Record<"attention" | "info" | "clear", typeof Flame> = {
+  attention: Flame,
+  info: Zap,
+  clear: CheckCircle2,
+};
+
+function CountPill({ kind, count }: { kind: "attention" | "info" | "clear"; count: number }) {
+  const s = pillStyles[kind];
+  const Ico = pillIcon[kind];
+  return (
+    <span className={`inline-flex h-10 items-center gap-2.5 rounded-full px-4 ${s.bg}`}>
+      <Ico className={`h-4 w-4 ${s.icon}`} />
+      <span className={`text-lg font-semibold leading-none ${s.num}`}>{count}</span>
+    </span>
+  );
 }
+
+const changeIcon: Record<"rose" | "amber" | "slate" | "emerald", typeof Flame> = {
+  rose: Flame,
+  amber: Zap,
+  slate: RefreshCw,
+  emerald: CheckCircle2,
+};
+
+const changeIconClass: Record<
+  "rose" | "amber" | "slate" | "emerald",
+  { bg: string; text: string }
+> = {
+  rose: { bg: "bg-rose-50", text: "text-rose-600" },
+  amber: { bg: "bg-amber-50", text: "text-amber-600" },
+  slate: { bg: "bg-slate-100", text: "text-slate-600" },
+  emerald: { bg: "bg-emerald-50", text: "text-emerald-600" },
+};
+
