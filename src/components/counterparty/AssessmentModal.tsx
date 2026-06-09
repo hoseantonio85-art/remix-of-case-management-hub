@@ -22,9 +22,9 @@ const statusMeta: Record<
   { label: string; chip: string; headerBg: string }
 > = {
   pending: {
-    label: "Требует подтверждения",
-    chip: "bg-amber-100 text-amber-900",
-    headerBg: "bg-gradient-to-b from-amber-50 via-amber-50/40 to-transparent",
+    label: "Не заключать сделки",
+    chip: "bg-rose-100 text-rose-900",
+    headerBg: "bg-gradient-to-b from-rose-50 via-rose-50/40 to-transparent",
   },
   confirmed: {
     label: "Подтверждена",
@@ -43,8 +43,8 @@ const statusMeta: Record<
   },
   review: {
     label: "На пересмотре",
-    chip: "bg-violet-100 text-violet-900",
-    headerBg: "bg-gradient-to-b from-violet-50 via-violet-50/40 to-transparent",
+    chip: "bg-amber-100 text-amber-900",
+    headerBg: "bg-gradient-to-b from-amber-50 via-amber-50/40 to-transparent",
   },
 };
 
