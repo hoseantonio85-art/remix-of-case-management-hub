@@ -324,14 +324,14 @@ export default function Index() {
 
   const processCounts = useMemo(() => {
     const map = { monitoring: 0, risk_confirmation: 0, settlement: 0, writeoff: 0 } as Record<ProcessStage, number>;
-    for (const c of counterparties) map[c.processStage]++;
+    for (const c of allCounterparties) map[c.processStage]++;
     return map;
-  }, []);
+  }, [allCounterparties]);
 
   const byProcess = useMemo(() => {
-    if (!processStage) return counterparties;
-    return counterparties.filter((c) => c.processStage === processStage);
-  }, [processStage]);
+    if (!processStage) return allCounterparties;
+    return allCounterparties.filter((c) => c.processStage === processStage);
+  }, [processStage, allCounterparties]);
 
   const allowedCategories = useMemo(() => {
     if (!processStage) return null;
