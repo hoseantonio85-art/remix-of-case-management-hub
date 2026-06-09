@@ -22,9 +22,9 @@ const statusMeta: Record<
   { label: string; chip: string; headerBg: string }
 > = {
   pending: {
-    label: "Требует подтверждения",
-    chip: "bg-amber-100 text-amber-900",
-    headerBg: "bg-gradient-to-b from-amber-50 via-amber-50/40 to-transparent",
+    label: "Не заключать сделки",
+    chip: "bg-rose-100 text-rose-900",
+    headerBg: "bg-gradient-to-b from-rose-50 via-rose-50/40 to-transparent",
   },
   confirmed: {
     label: "Подтверждена",
@@ -43,8 +43,8 @@ const statusMeta: Record<
   },
   review: {
     label: "На пересмотре",
-    chip: "bg-violet-100 text-violet-900",
-    headerBg: "bg-gradient-to-b from-violet-50 via-violet-50/40 to-transparent",
+    chip: "bg-amber-100 text-amber-900",
+    headerBg: "bg-gradient-to-b from-amber-50 via-amber-50/40 to-transparent",
   },
 };
 
@@ -259,7 +259,7 @@ export function AssessmentModal({
 
             <div className="flex flex-wrap items-center gap-2">
               <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.chip}`}>
-                {reassessmentCompleted ? "Обновлена, требует подтверждения" : meta.label}
+                {meta.label}
               </span>
             </div>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
