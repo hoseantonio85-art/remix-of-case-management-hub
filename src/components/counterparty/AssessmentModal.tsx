@@ -152,18 +152,6 @@ export function AssessmentModal({
     ];
   };
 
-  if (!assessment) return null;
-
-  const effectiveStatus: AssessmentStatus = disagreeSubmitted
-    ? "review"
-    : reassessmentCompleted
-      ? "updated"
-      : status;
-  const meta = statusMeta[effectiveStatus];
-  const baseSourceLabel =
-    assessment.source === "auto" ? "Автоматический мониторинг" : "Запущено пользователем";
-  const sourceLabel = reassessmentCompleted ? "Запущено пользователем · только что" : baseSourceLabel;
-
   const scrollToDisagree = () => {
     window.requestAnimationFrame(() => {
       disagreeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -204,11 +192,23 @@ export function AssessmentModal({
 
   const disagreeGroupTitles = useMemo(
     () =>
-      assessment.groups
+      (assessment?.groups ?? [])
         .filter((g) => disagreeGroupIds.includes(g.id))
         .map((g) => g.title),
-    [assessment.groups, disagreeGroupIds],
+    [assessment?.groups, disagreeGroupIds],
   );
+
+  if (!assessment) return null;
+
+  const effectiveStatus: AssessmentStatus = disagreeSubmitted
+    ? "review"
+    : reassessmentCompleted
+      ? "updated"
+      : status;
+  const meta = statusMeta[effectiveStatus];
+  const baseSourceLabel =
+    assessment.source === "auto" ? "Автоматический мониторинг" : "Запущено пользователем";
+  const sourceLabel = reassessmentCompleted ? "Запущено пользователем · только что" : baseSourceLabel;
 
 
   const handleDownload = () => {

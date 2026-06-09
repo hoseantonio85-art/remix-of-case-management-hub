@@ -2,13 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { largeModalContentClass } from "@/lib/modal-styles";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   ShieldCheck,
   ChevronRight,
@@ -40,13 +33,17 @@ import {
 } from "./DebtProcessDrawer";
 import { stepMetaByTitle } from "@/lib/debt-process";
 import { getToneForTag, toneStyles } from "./header-theme";
-import { riskMeta } from "./risk-meta";
 import { getCounterpartyProblemIndicators, problemIndicatorMeta } from "@/lib/problem-indicators";
 import { ResolutionCard } from "./ResolutionCard";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "./AssessmentModal";
 import { buildAssessment, type Assessment } from "@/lib/assessment-data";
 import { defaultOgrn } from "./RegistrationInfoWidget";
 import { RegistrationInfoDrawer } from "./RegistrationInfoDrawer";
+
+const toFiniteNumber = (value: unknown) => {
+  const numberValue = Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+};
 
 
 export function CounterpartyModal({
@@ -87,9 +84,13 @@ export function CounterpartyModal({
 
   useEffect(() => {
     if (counterparty && open) {
-      setRisks((counterparty.risks ?? []).map((r) => ({ ...r })));
-      setContracts((counterparty.contracts ?? []).map((c) => ({ ...c, overdueHistory: [...(c.overdueHistory ?? [])] })));
-      setSteps((counterparty.collection ?? []).map((s) => ({ ...s })));
+      const nextRisks = Array.isArray(counterparty.risks) ? counterparty.risks : [];
+      const nextContracts = Array.isArray(counterparty.contracts) ? counterparty.contracts : [];
+      const nextCollection = Array.isArray(counterparty.collection) ? counterparty.collection : [];
+
+      setRisks(nextRisks.map((r) => ({ ...r })));
+      setContracts(nextContracts.map((c) => ({ ...c, overdueHistory: [...(c.overdueHistory ?? [])] })));
+      setSteps(nextCollection.map((s) => ({ ...s })));
       setStepperError(null);
       setNotification(null);
       setStepAnim(null);
@@ -100,7 +101,7 @@ export function CounterpartyModal({
       setAssessmentDisagreement(null);
       setAssessmentOpen(false);
       setAssessmentRunning(false);
-      const curStep = (counterparty.collection ?? []).find((s) => s.status === "current");
+      const curStep = nextCollection.find((s) => s.status === "current");
       setHistory(
         curStep
           ? [
@@ -128,13 +129,16 @@ export function CounterpartyModal({
   const confirmed = useMemo(() => risks.filter((r) => r.status === "confirmed"), [risks]);
   const dismissed = useMemo(() => risks.filter((r) => r.status === "dismissed"), [risks]);
   const decidedCount = confirmed.length + dismissed.length + verification.length;
-  const totalOverdue = contracts.reduce((acc, c) => acc + c.overdue, 0);
+  const totalOverdue = contracts.reduce((acc, c) => {
+    return acc + toFiniteNumber(c?.overdue);
+  }, 0);
+  const totalOverdueLabel = `${totalOverdue.toFixed(1)} млн. ₽`;
   const currentStage = steps.find((s) => s.status === "current");
   const allMeasures = confirmed.flatMap((r) => r.decision?.measures ?? []);
 
   const overdueStartDate = useMemo(() => {
     const dates = contracts
-      .flatMap((c) => c.overdueHistory.map((h) => h.date))
+      .flatMap((c) => (c.overdueHistory ?? []).map((h) => h.date))
       .filter(Boolean);
     if (dates.length === 0) return "";
     const parsed = dates
@@ -151,7 +155,10 @@ export function CounterpartyModal({
   }, [contracts]);
 
   const maxOverdueDays = useMemo(
-    () => contracts.reduce((m, c) => Math.max(m, c.overdueDays), 0),
+    () =>
+      contracts.reduce((m, c) => {
+        return Math.max(m, toFiniteNumber(c?.overdueDays));
+      }, 0),
     [contracts],
   );
 
@@ -375,7 +382,7 @@ export function CounterpartyModal({
       date: new Date().toLocaleDateString("ru-RU"),
       action: "Переведен этап",
       step: next.title,
-      user: counterparty?.risks[0]?.decision?.responsible ?? "Михайлова Екатерина",
+      user: counterparty?.risks?.[0]?.decision?.responsible ?? "Михайлова Екатерина",
     });
   };
 
@@ -436,9 +443,9 @@ export function CounterpartyModal({
         c.id === id
           ? {
               ...c,
-              overdue: c.overdue + record.amount,
-              overdueDays: Math.max(c.overdueDays, record.days),
-              overdueHistory: [record, ...c.overdueHistory],
+              overdue: toFiniteNumber(c.overdue) + toFiniteNumber(record.amount),
+              overdueDays: Math.max(toFiniteNumber(c.overdueDays), toFiniteNumber(record.days)),
+              overdueHistory: [record, ...(c.overdueHistory ?? [])],
             }
           : c,
       ),
@@ -447,13 +454,30 @@ export function CounterpartyModal({
       prev && prev.id === id
         ? {
             ...prev,
-            overdue: prev.overdue + record.amount,
-            overdueDays: Math.max(prev.overdueDays, record.days),
-            overdueHistory: [record, ...prev.overdueHistory],
+            overdue: toFiniteNumber(prev.overdue) + toFiniteNumber(record.amount),
+            overdueDays: Math.max(toFiniteNumber(prev.overdueDays), toFiniteNumber(record.days)),
+            overdueHistory: [record, ...(prev.overdueHistory ?? [])],
           }
         : prev,
     );
   };
+
+  const problemIndicators = getCounterpartyProblemIndicators(counterparty)
+    .map((key) => {
+      const meta = problemIndicatorMeta[key] as Partial<(typeof problemIndicatorMeta)[typeof key]> | undefined;
+      const Icon = meta?.icon;
+      const label = meta?.label;
+      if (!Icon || !label) return null;
+      return {
+        key,
+        Icon,
+        label,
+        activeBorder: meta.activeBorder ?? "border-border",
+        activeBg: meta.activeBg ?? "bg-white",
+        iconColor: meta.iconColor ?? "text-muted-foreground",
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -478,30 +502,19 @@ export function CounterpartyModal({
                   <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${styles.badge}`}>
                     {counterparty.tag}
                   </span>
-                  <TooltipProvider delayDuration={150}>
-                    {getCounterpartyProblemIndicators(counterparty)
-                      .map((k) => ({ k, m: problemIndicatorMeta[k] }))
-                      .filter((x) => Boolean(x.m))
-                      .map(({ k, m }) => {
-                        const Icon = m.icon;
-                        return (
-                          <Tooltip key={k}>
-                            <TooltipTrigger asChild>
-                              <span
-                                aria-label={m.label}
-                                title={m.label}
-                                className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${m.activeBorder} ${m.activeBg} transition hover:brightness-95`}
-                              >
-                                <Icon className={`h-3.5 w-3.5 ${m.iconColor}`} />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom">
-                              <p className="text-xs">{m.label}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                  </TooltipProvider>
+                  {problemIndicators.map((item) => {
+                    const Icon = item.Icon;
+                    return (
+                      <span
+                        key={item.key}
+                        aria-label={item.label}
+                        title={item.label}
+                        className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${item.activeBorder} ${item.activeBg} transition hover:brightness-95`}
+                      >
+                        <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
+                      </span>
+                    );
+                  })}
                 </div>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{counterparty.name}</h2>
                 <div className="mt-1 text-sm text-muted-foreground">
@@ -531,7 +544,7 @@ export function CounterpartyModal({
               <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
               <DebtCard
                 label="Просроченная задолженность"
-                value={`${totalOverdue.toFixed(1)} млн. ₽`}
+                value={totalOverdueLabel}
                 accent={totalOverdue > 0}
               />
             </div>
@@ -644,23 +657,27 @@ export function CounterpartyModal({
               <SectionTitle title="Договоры" count={contracts.length} muted />
               <div className="overflow-hidden rounded-xl border border-border bg-white">
                 {contracts.map((c, i) => {
-                  const overdue = c.overdue > 0;
+                  const amount = toFiniteNumber(c.amount);
+                  const debt = toFiniteNumber(c.debt);
+                  const overdueAmount = toFiniteNumber(c.overdue);
+                  const overdueDays = toFiniteNumber(c.overdueDays);
+                  const overdue = overdueAmount > 0;
                   return (
                     <button
-                      key={c.id}
+                      key={c.id ?? i}
                       onClick={() => setContractDrawer(c)}
                       className={`flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-muted/40 ${
                         i > 0 ? "border-t border-border" : ""
                       }`}
                     >
                       <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:grid-cols-5">
-                        <Cell label="Договор" value={c.number} sub={`от ${c.date}`} />
-                        <Cell label="Сумма" value={`${c.amount.toFixed(1)} млн. ₽`} />
-                        <Cell label="Задолженность" value={`${c.debt.toFixed(1)} млн. ₽`} />
+                        <Cell label="Договор" value={c.number ?? "—"} sub={`от ${c.date ?? "—"}`} />
+                        <Cell label="Сумма" value={`${amount.toFixed(1)} млн. ₽`} />
+                        <Cell label="Задолженность" value={`${debt.toFixed(1)} млн. ₽`} />
                         <Cell
                           label="Просрочено"
-                          value={overdue ? `${c.overdue.toFixed(1)} млн. ₽` : "нет"}
-                          sub={overdue ? `${c.overdueDays} дн.` : undefined}
+                          value={overdue ? `${overdueAmount.toFixed(1)} млн. ₽` : "нет"}
+                          sub={overdue ? `${overdueDays} дн.` : undefined}
                           accent={overdue}
                         />
                         <Cell label="Этап" value={c.collectionStage ?? "—"} />
@@ -700,7 +717,7 @@ export function CounterpartyModal({
           completedFields={completedFields}
           history={history}
           summary={{
-            overdueAmount: `${totalOverdue.toFixed(1)} млн. ₽`,
+            overdueAmount: totalOverdueLabel,
             overdueStartDate,
             overdueDays: maxOverdueDays,
             responsible: "Михайлова Екатерина",
