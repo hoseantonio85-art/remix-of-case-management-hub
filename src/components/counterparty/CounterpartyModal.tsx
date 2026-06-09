@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { largeModalContentClass } from "@/lib/modal-styles";
-import { Button } from "@/components/ui/button";
 import {
   ShieldCheck,
   ChevronRight,
@@ -34,7 +33,6 @@ import {
 } from "./DebtProcessDrawer";
 import { stepMetaByTitle } from "@/lib/debt-process";
 import { getToneForTag, toneStyles } from "./header-theme";
-import { riskMeta } from "./risk-meta";
 import { getCounterpartyProblemIndicators, problemIndicatorMeta } from "@/lib/problem-indicators";
 import { ResolutionCard } from "./ResolutionCard";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "./AssessmentModal";
@@ -81,9 +79,13 @@ export function CounterpartyModal({
 
   useEffect(() => {
     if (counterparty && open) {
-      setRisks((counterparty.risks ?? []).map((r) => ({ ...r })));
-      setContracts((counterparty.contracts ?? []).map((c) => ({ ...c, overdueHistory: [...(c.overdueHistory ?? [])] })));
-      setSteps((counterparty.collection ?? []).map((s) => ({ ...s })));
+      const nextRisks = Array.isArray(counterparty.risks) ? counterparty.risks : [];
+      const nextContracts = Array.isArray(counterparty.contracts) ? counterparty.contracts : [];
+      const nextCollection = Array.isArray(counterparty.collection) ? counterparty.collection : [];
+
+      setRisks(nextRisks.map((r) => ({ ...r })));
+      setContracts(nextContracts.map((c) => ({ ...c, overdueHistory: [...(c.overdueHistory ?? [])] })));
+      setSteps(nextCollection.map((s) => ({ ...s })));
       setStepperError(null);
       setNotification(null);
       setStepAnim(null);
@@ -94,7 +96,7 @@ export function CounterpartyModal({
       setAssessmentDisagreement(null);
       setAssessmentOpen(false);
       setAssessmentRunning(false);
-      const curStep = (counterparty.collection ?? []).find((s) => s.status === "current");
+      const curStep = nextCollection.find((s) => s.status === "current");
       setHistory(
         curStep
           ? [
@@ -459,8 +461,18 @@ export function CounterpartyModal({
 
   const problemIndicators = getCounterpartyProblemIndicators(counterparty)
     .map((key) => {
-      const meta = problemIndicatorMeta[key];
-      return meta && meta.icon && meta.label ? { key, meta } : null;
+      const meta = problemIndicatorMeta[key] as Partial<(typeof problemIndicatorMeta)[typeof key]> | undefined;
+      const Icon = meta?.icon;
+      const label = meta?.label;
+      if (!Icon || !label) return null;
+      return {
+        key,
+        Icon,
+        label,
+        activeBorder: meta.activeBorder ?? "border-border",
+        activeBg: meta.activeBg ?? "bg-white",
+        iconColor: meta.iconColor ?? "text-muted-foreground",
+      };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
