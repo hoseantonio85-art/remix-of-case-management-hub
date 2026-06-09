@@ -633,8 +633,8 @@ export default function Index() {
 
             {showRiskChips && (
               <div className="mb-5 flex flex-wrap gap-2">
-                {(["all", ...riskOrder] as RiskChipKey[]).map((key) => {
-                  const meta = key === "all" ? allChipMeta : riskMeta[key as RiskType];
+                {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
+                  const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
                   const Icon = meta.icon;
                   const count = riskCounts[key] ?? 0;
                   const isActive = riskFilter === key;
