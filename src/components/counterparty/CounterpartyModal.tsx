@@ -500,15 +500,15 @@ export function CounterpartyModal({
                     {counterparty.tag}
                   </span>
                   {problemIndicators.map((item) => {
-                    const Icon = item.meta.icon;
+                    const Icon = item.Icon;
                     return (
                       <span
                         key={item.key}
-                        aria-label={item.meta.label}
-                        title={item.meta.label}
-                        className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${item.meta.activeBorder} ${item.meta.activeBg} transition hover:brightness-95`}
+                        aria-label={item.label}
+                        title={item.label}
+                        className={`inline-flex h-7 w-7 cursor-help items-center justify-center rounded-full border ${item.activeBorder} ${item.activeBg} transition hover:brightness-95`}
                       >
-                        <Icon className={`h-3.5 w-3.5 ${item.meta.iconColor}`} />
+                        <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
                       </span>
                     );
                   })}
@@ -541,7 +541,7 @@ export function CounterpartyModal({
               <DebtCard label="Общая задолженность" value={counterparty.totalDebt} />
               <DebtCard
                 label="Просроченная задолженность"
-                value={`${totalOverdue.toFixed(1)} млн. ₽`}
+                value={totalOverdueLabel}
                 accent={totalOverdue > 0}
               />
             </div>
@@ -710,7 +710,7 @@ export function CounterpartyModal({
           completedFields={completedFields}
           history={history}
           summary={{
-            overdueAmount: `${totalOverdue.toFixed(1)} млн. ₽`,
+            overdueAmount: totalOverdueLabel,
             overdueStartDate,
             overdueDays: maxOverdueDays,
             responsible: "Михайлова Екатерина",
