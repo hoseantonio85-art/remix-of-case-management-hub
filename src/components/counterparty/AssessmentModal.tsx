@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { largeModalContentClass } from "@/lib/modal-styles";
 import {
   type Assessment,
   type AssessmentGroup,
