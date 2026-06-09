@@ -9,7 +9,6 @@ import {
   type Assessment,
   type AssessmentGroup,
   groupCounts,
-  toneStyles,
 } from "@/lib/assessment-data";
 import { AssessmentGroupDrawer } from "./AssessmentGroupDrawer";
 import { defaultOgrn } from "./RegistrationInfoWidget";
