@@ -20,6 +20,7 @@ export default function App() {
           <Route path="/" element={<Index />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster position="bottom-right" />
       </BrowserRouter>
     </QueryClientProvider>
   );
