@@ -60,7 +60,7 @@ export function CounterpartyModal({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [contractDrawer, setContractDrawer] = useState<Contract | null>(null);
   const [stepperError, setStepperError] = useState<string | null>(null);
-  const [showAllPending, setShowAllPending] = useState(false);
+  
   const [debtDrawerOpen, setDebtDrawerOpen] = useState(false);
   const [notification, setNotification] = useState<
     { tone: "success" | "info"; text: string } | null
