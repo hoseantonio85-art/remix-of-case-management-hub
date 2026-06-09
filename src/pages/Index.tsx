@@ -730,7 +730,7 @@ export default function Index() {
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-foreground">Оценить контрагента</div>
               <p className="mt-0.5 text-[12px] text-muted-foreground">
-                Агент проверит контрагента по 43 критериям благонадёжности. Укажите ИНН.
+                Введите ИНН, чтобы запустить проверку благонадёжности
               </p>
             </div>
             <button
