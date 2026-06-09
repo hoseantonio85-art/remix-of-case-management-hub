@@ -62,7 +62,7 @@ const REASONS = [
   "Другое",
 ];
 
-export type Disagreement = { reason: string; text: string };
+export type Disagreement = { reason?: string; text: string; groups?: string[] };
 
 export function AssessmentModal({
   assessment,
