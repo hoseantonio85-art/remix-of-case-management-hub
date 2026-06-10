@@ -231,11 +231,16 @@ export function AssessmentModal({
     : reassessmentCompleted
       ? "updated"
       : status;
-  const meta = statusMeta[effectiveStatus];
-  const resolutionBadge = {
-    label: "Не заключать сделки",
-    chip: "bg-rose-100 text-rose-900",
-  };
+  const meta = positive
+    ? {
+        label: "Сделки заключать можно",
+        chip: "bg-emerald-100 text-emerald-900",
+        headerBg: "bg-gradient-to-b from-emerald-50 via-emerald-50/40 to-transparent",
+      }
+    : statusMeta[effectiveStatus];
+  const resolutionBadge = positive
+    ? { label: "Сделки заключать можно", chip: "bg-emerald-100 text-emerald-900" }
+    : { label: "Не заключать сделки", chip: "bg-rose-100 text-rose-900" };
   const statusBadge: { label: string; chip: string } | null = isReassessmentRunning
     ? { label: "Обновляется", chip: "bg-slate-100 text-slate-700" }
     : disagreeSubmitted
