@@ -390,7 +390,7 @@ export function ContractDrawer({
                   <Input
                     placeholder="ДД.ММ.ГГГГ"
                     value={completionDate}
-                    onChange={(e) => setCompletionDate(e.target.value)}
+                    onChange={(v) => setCompletionDate(v)}
                   />
                 </div>
 
@@ -415,7 +415,7 @@ export function ContractDrawer({
                   <Textarea
                     placeholder="Контекст перехода (необязательно)"
                     value={transitionComment}
-                    onChange={(e) => setTransitionComment(e.target.value)}
+                    onChange={(v) => setTransitionComment(v)}
                   />
                 </div>
 

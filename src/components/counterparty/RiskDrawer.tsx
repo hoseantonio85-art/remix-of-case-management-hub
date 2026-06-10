@@ -141,14 +141,14 @@ export function RiskDrawer({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs text-muted-foreground">Дата решения</label>
-              <Input value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input value={date} onChange={(v) => setDate(v)} />
             </div>
             {mode === "verify" && (
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">
                   Ответственный <span className="text-destructive">*</span>
                 </label>
-                <Input value={responsible} onChange={(e) => setResponsible(e.target.value)} />
+                <Input value={responsible} onChange={(v) => setResponsible(v)} />
               </div>
             )}
             {mode === "verify" && (
@@ -156,7 +156,7 @@ export function RiskDrawer({
                 <label className="mb-1 block text-xs text-muted-foreground">
                   Плановая дата проверки <span className="text-destructive">*</span>
                 </label>
-                <Input value={plannedDate} onChange={(e) => setPlannedDate(e.target.value)} />
+                <Input value={plannedDate} onChange={(v) => setPlannedDate(v)} />
               </div>
             )}
             <div className="sm:col-span-2">
@@ -170,7 +170,7 @@ export function RiskDrawer({
                 rows={3}
                 placeholder="Опишите контекст принятого решения…"
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                onChange={(v) => setComment(v)}
               />
             </div>
           </div>
