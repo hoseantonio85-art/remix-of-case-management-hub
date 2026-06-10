@@ -149,7 +149,8 @@ export interface TitleProps extends Omit<React.HTMLAttributes<HTMLHeadingElement
   white?: boolean;
   children: React.ReactNode;
 }
-const TITLE_STYLE: Record<TitleSize, { cls: string; tag: keyof JSX.IntrinsicElements }> = {
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+const TITLE_STYLE: Record<TitleSize, { cls: string; tag: HeadingTag }> = {
   H200: { cls: "text-xs font-semibold", tag: "h6" },
   H300: { cls: "text-sm font-semibold", tag: "h6" },
   H400: { cls: "text-base font-semibold", tag: "h5" },
