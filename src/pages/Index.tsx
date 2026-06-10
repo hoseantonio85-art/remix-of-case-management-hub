@@ -856,8 +856,8 @@ export default function Index() {
               <label className="text-[11px] font-medium text-muted-foreground">ИНН</label>
               <Input
                 value={runInn}
-                onChange={(e) => {
-                  setRunInn(e.target.value);
+                onChange={(v) => {
+                  setRunInn(v);
                   if (runError) setRunError(null);
                 }}
                 placeholder="Введите ИНН контрагента"
