@@ -137,22 +137,36 @@ const court: AssessmentGroup = {
 
 export const defaultGroups: AssessmentGroup[] = [legal, management, finance, court];
 
+function toPositiveGroups(groups: AssessmentGroup[]): AssessmentGroup[] {
+  return groups.map((g) => ({
+    ...g,
+    criteria: g.criteria.map((c) =>
+      c.passed === false
+        ? { ...c, passed: true as boolean | null, reason: OK_REASON }
+        : { ...c },
+    ),
+  }));
+}
+
 export function buildAssessment(
   counterpartyName: string,
   inn: string,
   source: AssessmentSource = "auto",
   dateOverride?: string,
+  variant: "negative" | "positive" = "negative",
 ): Assessment {
+  const isPositive = variant === "positive";
   return {
     inn,
     counterpartyName,
     date: dateOverride ?? "04.06.2026",
     nextCheck: source === "auto" ? "завтра" : undefined,
     source,
-    summary:
-      "По результатам оценки выявлены критические факторы по руководству и финансовой устойчивости.",
+    summary: isPositive
+      ? "Критически значимых факторов риска не выявлено."
+      : "По результатам оценки выявлены критические факторы по руководству и финансовой устойчивости.",
     changes: [],
-    groups: defaultGroups,
+    groups: isPositive ? toPositiveGroups(defaultGroups) : defaultGroups,
   };
 }
 

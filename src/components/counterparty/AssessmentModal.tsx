@@ -87,6 +87,7 @@ export function AssessmentModal({
   onDisagree,
   onBack,
   onCloseFlow,
+  positive = false,
 }: {
   assessment: Assessment | null;
   open: boolean;
@@ -100,6 +101,7 @@ export function AssessmentModal({
   onDisagree: (d: Disagreement) => void;
   onBack?: () => void;
   onCloseFlow?: () => void;
+  positive?: boolean;
 }) {
   const [notice, setNotice] = useState<{ tone: "success" | "info"; text: string } | null>(null);
   const [groupDrawer, setGroupDrawer] = useState<AssessmentGroup | null>(null);
@@ -229,11 +231,16 @@ export function AssessmentModal({
     : reassessmentCompleted
       ? "updated"
       : status;
-  const meta = statusMeta[effectiveStatus];
-  const resolutionBadge = {
-    label: "Не заключать сделки",
-    chip: "bg-rose-100 text-rose-900",
-  };
+  const meta = positive
+    ? {
+        label: "Сделки заключать можно",
+        chip: "bg-emerald-100 text-emerald-900",
+        headerBg: "bg-gradient-to-b from-emerald-50 via-emerald-50/40 to-transparent",
+      }
+    : statusMeta[effectiveStatus];
+  const resolutionBadge = positive
+    ? { label: "Сделки заключать можно", chip: "bg-emerald-100 text-emerald-900" }
+    : { label: "Не заключать сделки", chip: "bg-rose-100 text-rose-900" };
   const statusBadge: { label: string; chip: string } | null = isReassessmentRunning
     ? { label: "Обновляется", chip: "bg-slate-100 text-slate-700" }
     : disagreeSubmitted
@@ -314,9 +321,19 @@ export function AssessmentModal({
                 Подробнее
               </button>
             </div>
-            <div className="mt-5 rounded-3xl bg-gradient-to-r from-rose-200 via-red-100 to-orange-100 p-[1.5px]">
-              <div className="flex items-start gap-4 rounded-[22px] bg-gradient-to-br from-rose-50/60 via-white to-white px-6 py-5">
-                <NormAssistantIcon size="lg" />
+            <div className={cn(
+              "mt-5 rounded-3xl p-[1.5px]",
+              positive
+                ? "bg-gradient-to-r from-emerald-200 via-emerald-100 to-teal-100"
+                : "bg-gradient-to-r from-rose-200 via-red-100 to-orange-100",
+            )}>
+              <div className={cn(
+                "flex items-start gap-4 rounded-[22px] px-6 py-5",
+                positive
+                  ? "bg-gradient-to-br from-emerald-50/60 via-white to-white"
+                  : "bg-gradient-to-br from-rose-50/60 via-white to-white",
+              )}>
+                <NormAssistantIcon size="lg" tone={positive ? "emerald" : "rose"} />
                 <div className="min-w-0 flex-1">
                   <div className="mt-1 text-lg font-semibold text-slate-900">
                     Обоснование оценки
@@ -327,7 +344,9 @@ export function AssessmentModal({
                     </div>
                   )}
                   <p className="mt-2 text-sm leading-snug text-muted-foreground">
-                    Компания имеет критически значимые риски: за последние 6 месяцев сменились собственники или директор, оперативное погашение краткосрочных обязательств невозможно, а также активы сформированы в основном за счёт привлечённых средств.
+                    {positive
+                      ? "Критически значимых факторов риска не выявлено. Финансовые, регистрационные и репутационные признаки не блокируют заключение сделки."
+                      : "Компания имеет критически значимые риски: за последние 6 месяцев сменились собственники или директор, оперативное погашение краткосрочных обязательств невозможно, а также активы сформированы в основном за счёт привлечённых средств."}
                   </p>
                 </div>
               </div>
@@ -367,7 +386,7 @@ export function AssessmentModal({
               <aside className="order-2 lg:col-start-2 lg:row-start-1">
 
                 <div className="space-y-3 lg:sticky lg:top-0">
-                  <KeyAnomaliesWidget />
+                  {!positive && <KeyAnomaliesWidget />}
 
                   {(isReassessmentRunning || reassessmentCompleted) && (
                     <div className="rounded-2xl border border-border bg-white p-4">
