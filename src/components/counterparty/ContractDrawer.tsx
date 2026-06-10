@@ -415,7 +415,7 @@ export function ContractDrawer({
                   <Textarea
                     placeholder="Контекст перехода (необязательно)"
                     value={transitionComment}
-                    onChange={(v) => setTransitionComment(v)}
+                    onChange={(e) => setTransitionComment(e.target.value)}
                   />
                 </div>
 
