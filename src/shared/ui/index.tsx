@@ -83,14 +83,13 @@ export const Title: React.FC<React.HTMLAttributes<HTMLHeadingElement> & { level?
   className,
   ...rest
 }) => {
-  const Tag = (`h${level}` as unknown) as keyof JSX.IntrinsicElements;
   const sizes = {
     1: "text-3xl font-semibold tracking-tight",
     2: "text-2xl font-semibold tracking-tight",
     3: "text-xl font-semibold",
     4: "text-base font-semibold",
   } as const;
-  return React.createElement(Tag, { className: cn(sizes[level], className), ...rest });
+  return React.createElement(`h${level}`, { className: cn(sizes[level], className), ...rest });
 };
 
 export const Link: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = ({ className, ...rest }) => (
