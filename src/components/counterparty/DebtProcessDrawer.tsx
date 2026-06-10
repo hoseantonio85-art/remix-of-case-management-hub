@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, ArrowLeft, AlertTriangle, CheckCircle2, Paperclip, FileText, Clock, History as HistoryIcon } from "lucide-react";
+import { ArrowRight, ArrowLeft, AlertTriangle, Check, Paperclip, FileText, Clock, History as HistoryIcon } from "lucide-react";
 import type { CollectionSubStep } from "@/lib/mock-data";
 import { InModalDrawer } from "./InModalDrawer";
 import type { StepAnim } from "./DebtSummaryCard";
@@ -29,6 +29,8 @@ export interface DebtSummary {
 }
 
 export type CompletedFields = Record<string, Record<string, string>>;
+
+type StepStatus = "done" | "current" | "upcoming";
 
 export function DebtProcessDrawer({
   steps,
@@ -71,163 +73,285 @@ export function DebtProcessDrawer({
 
   const canRollback = currentIdx > 0;
 
+  // Build a flat timeline of items: stage headers + steps in order.
+  type TimelineItem =
+    | { kind: "stage"; stage: string; active: boolean; done: boolean }
+    | { kind: "step"; step: CollectionSubStep; globalIndex: number; status: StepStatus };
+
+  const items: TimelineItem[] = [];
+  for (const stage of stageOrder) {
+    const stageSteps = steps
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => s.stage === stage);
+    if (stageSteps.length === 0) continue;
+    const active = stageSteps.some(({ s }) => s.status === "current");
+    const done = stageSteps.every(({ s }) => s.status === "done");
+    items.push({ kind: "stage", stage, active, done });
+    for (const { s, i } of stageSteps) {
+      const status: StepStatus =
+        s.status === "current" ? "current" : s.status === "done" ? "done" : "upcoming";
+      items.push({ kind: "step", step: s, globalIndex: i, status });
+    }
+  }
+
   return (
     <InModalDrawer open={open} onOpenChange={onOpenChange}>
-      <div className="bg-gradient-to-b from-slate-50 via-slate-50/40 to-transparent px-6 pt-6 pb-5">
-        <h2 className="text-2xl font-semibold tracking-tight">Работа с задолженностью</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Контроль этапов взыскания, SLA и обязательных данных
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4">
+        <h2 className="text-lg font-semibold tracking-tight">Работа с задолженностью</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Этапы взыскания, SLA и обязательные данные
         </p>
+        {/* compact summary chips */}
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+          <Chip label="Просрочка" value={summary.overdueAmount} accent={summary.overdueDays > 0} />
+          <Chip label="Дней" value={summary.overdueDays > 0 ? `${summary.overdueDays}` : "—"} />
+          <Chip label="Текущий" value={current?.title ?? "—"} />
+          <Chip label="План" value={current?.plannedDate ?? "—"} />
+          <Chip label="Ответственный" value={summary.responsible} />
+        </div>
       </div>
 
-      <div className="px-6 pb-6 pt-2 space-y-5">
-        {/* Summary */}
-        <section className="rounded-2xl border border-border bg-white p-4">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-            <SummaryItem label="Просроченная задолженность" value={summary.overdueAmount} accent={summary.overdueDays > 0} />
-            <SummaryItem label="Дата возникновения" value={summary.overdueStartDate || "—"} />
-            <SummaryItem label="Дней просрочки" value={summary.overdueDays > 0 ? `${summary.overdueDays}` : "—"} />
-            <SummaryItem label="Текущий этап" value={current?.title ?? "—"} />
-            <SummaryItem label="Плановая дата" value={current?.plannedDate ?? "—"} />
-            <SummaryItem label="Ответственный" value={summary.responsible} />
-          </div>
-        </section>
+      <div className="px-6 pb-6 space-y-6">
+        {/* Timeline */}
+        <section className="relative">
+          {/* vertical line */}
+          <div
+            className="absolute left-[11px] top-2 bottom-2 w-px bg-border"
+            aria-hidden="true"
+          />
+          <ul className="space-y-5">
+            {items.map((item, idx) => {
+              if (item.kind === "stage") {
+                return (
+                  <li key={`stage-${item.stage}-${idx}`} className="relative pl-8">
+                    <span
+                      className={`absolute left-[7px] top-1.5 h-2 w-2 rounded-full ring-2 ring-background ${
+                        item.active
+                          ? "bg-primary"
+                          : item.done
+                            ? "bg-emerald-500"
+                            : "bg-muted-foreground/30"
+                      }`}
+                    />
+                    <div
+                      className={`text-[11px] font-semibold uppercase tracking-wide ${
+                        item.active ? "text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      {item.stage}
+                    </div>
+                  </li>
+                );
+              }
+              const { step, status } = item;
+              const meta = stepMetaByTitle[step.title];
+              const isCurrent = status === "current";
+              const isDone = status === "done";
+              const dueDate =
+                isCurrent && meta && step.startDate ? computeDue(step.startDate, meta) : null;
+              const remaining = dueDate ? diffDays(TODAY, dueDate) : null;
+              const overdue = remaining !== null && remaining < 0;
 
-        {/* Timeline grouped by stage */}
-        <section className="space-y-4">
-          {stageOrder.map((stage) => {
-            const stageSteps = steps
-              .map((s, i) => ({ s, i }))
-              .filter(({ s }) => s.stage === stage);
-            const stageActive = stageSteps.some(({ s }) => s.status === "current");
-            const stageDone =
-              stageSteps.length > 0 && stageSteps.every(({ s }) => s.status === "done");
-            return (
-              <div key={stage}>
-                <div className="mb-2 flex items-center gap-2">
+              return (
+                <li key={step.id} className="relative pl-8">
+                  {/* marker */}
+                  <span
+                    key={`dot-${stepAnim?.tick ?? "static"}-${step.id}`}
+                    className={`absolute left-[3px] top-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full ring-2 ring-background transition-transform duration-500 ${
+                      isCurrent
+                        ? overdue
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                        : isDone
+                          ? "bg-emerald-500"
+                          : "border border-border bg-background"
+                    } ${isCurrent && stepAnim ? "scale-110" : "scale-100"}`}
+                  >
+                    {isDone && <Check className="h-3 w-3 text-white" />}
+                    {isCurrent && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </span>
+
+                  {/* content */}
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      stageDone || stageActive ? "bg-primary" : "bg-muted-foreground/30"
-                    }`}
-                  />
-                  <div
-                    className={`text-[11px] font-semibold uppercase tracking-wide ${
-                      stageActive ? "text-foreground" : "text-muted-foreground"
+                    className={`rounded-lg ${
+                      isCurrent
+                        ? "border border-border bg-slate-50/70 p-3"
+                        : "px-0 py-0.5"
                     }`}
                   >
-                    {stage}
+                    <div className="flex items-start justify-between gap-3">
+                      <div
+                        className={`text-sm leading-tight ${
+                          isCurrent
+                            ? "font-semibold text-foreground"
+                            : isDone
+                              ? "font-medium text-muted-foreground"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {step.title}
+                      </div>
+                      <StatusBadge status={status} overdue={overdue} />
+                    </div>
+
+                    {meta && (isCurrent || isDone) && (
+                      <div
+                        className={`mt-1 text-xs leading-snug ${
+                          isCurrent ? "text-muted-foreground" : "text-muted-foreground/80"
+                        }`}
+                      >
+                        {meta.description}
+                      </div>
+                    )}
+
+                    {/* meta line */}
+                    {isCurrent && (
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        {meta?.slaLabel && (
+                          <span>
+                            SLA: <b className="text-foreground">{meta.slaLabel}</b>
+                          </span>
+                        )}
+                        {step.startDate && (
+                          <span>
+                            Старт: <b className="text-foreground">{step.startDate}</b>
+                          </span>
+                        )}
+                        {dueDate && (
+                          <span>
+                            План:{" "}
+                            <b className="text-foreground">{formatDDMMYYYY(dueDate)}</b>
+                          </span>
+                        )}
+                        {remaining !== null && (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
+                              overdue
+                                ? "bg-amber-50 text-amber-800 border border-amber-100"
+                                : "bg-emerald-50 text-emerald-800 border border-emerald-100"
+                            }`}
+                          >
+                            {overdue ? (
+                              <>
+                                <AlertTriangle className="h-3 w-3" /> Просрочено на{" "}
+                                {Math.abs(remaining)} дн.
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-3 w-3" /> Осталось {remaining} дн.
+                              </>
+                            )}
+                          </span>
+                        )}
+                        {!dueDate && meta?.slaType === "none" && (
+                          <span className="rounded-full bg-muted px-2 py-0.5">Без SLA</span>
+                        )}
+                      </div>
+                    )}
+
+                    {isCurrent && meta?.control && (
+                      <div className="mt-2 text-[11px] text-muted-foreground">
+                        <span>Контроль: </span>
+                        <span className="text-foreground">{meta.control}</span>
+                      </div>
+                    )}
+
+                    {/* Required fields inline under current step */}
+                    {isCurrent && currentMeta?.requiredFields && currentMeta.requiredFields.length > 0 && (
+                      <div className="mt-3 space-y-2 border-t border-border/70 pt-3">
+                        <div className="text-[11px] font-medium text-foreground">
+                          Данные для перехода
+                        </div>
+                        {currentMeta.requiredFields.map((f) => (
+                          <FieldInput
+                            key={f.key}
+                            field={f}
+                            value={completedFields[step.id]?.[f.key] ?? ""}
+                            onChange={(v) => onFieldChange(step.id, f.key, v)}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Inline actions under current step */}
+                    {isCurrent && (
+                      <div className="mt-3 space-y-2">
+                        {error && (
+                          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-900">
+                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                            <div>{error}</div>
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={onAdvance}
+                            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-700"
+                          >
+                            <ArrowRight className="h-3.5 w-3.5" /> На следующий этап
+                          </button>
+                          {canRollback && !rollbackOpen && (
+                            <button
+                              onClick={() => setRollbackOpen(true)}
+                              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
+                            >
+                              <ArrowLeft className="h-3.5 w-3.5" /> Вернуть этап
+                            </button>
+                          )}
+                        </div>
+                        {canRollback && rollbackOpen && (
+                          <div className="rounded-md border border-border bg-white p-2.5 space-y-2">
+                            <div className="text-[11px] font-medium text-foreground">
+                              Причина отката
+                            </div>
+                            <textarea
+                              value={rollbackComment}
+                              onChange={(e) => setRollbackComment(e.target.value)}
+                              rows={2}
+                              placeholder="Комментарий обязателен"
+                              className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none focus:border-foreground/30"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleRollback}
+                                disabled={!rollbackComment.trim()}
+                                className="rounded-md bg-foreground px-2.5 py-1 text-xs font-medium text-background disabled:opacity-40"
+                              >
+                                Подтвердить
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setRollbackOpen(false);
+                                  setRollbackComment("");
+                                }}
+                                className="rounded-md border border-border bg-white px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/40"
+                              >
+                                Отмена
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="space-y-2">
-                  {stageSteps.map(({ s, i }) => (
-                    <StepCard
-                      key={s.id}
-                      step={s}
-                      globalIndex={i}
-                      animating={s.status === "current" && !!stepAnim}
-                      animTick={stepAnim?.tick}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
-        {/* Required fields for current step */}
-        {current && currentMeta && (
-          <section className="rounded-2xl border border-border bg-white p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <h3 className="text-sm font-semibold">Данные для перехода</h3>
-              <span className="text-[11px] text-muted-foreground">этап: {current.title}</span>
-            </div>
-            {currentMeta.requiredFields && currentMeta.requiredFields.length > 0 ? (
-              <div className="space-y-3">
-                {currentMeta.requiredFields.map((f) => (
-                  <FieldInput
-                    key={f.key}
-                    field={f}
-                    value={completedFields[current.id]?.[f.key] ?? ""}
-                    onChange={(v) => onFieldChange(current.id, f.key, v)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">
-                Для перехода с этого этапа дополнительные данные не требуются
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Error */}
-        {error && (
-          <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <div>{error}</div>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="space-y-2">
-          <button
-            onClick={onAdvance}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700"
-          >
-            <ArrowRight className="h-4 w-4" /> Перевести на следующий этап
-          </button>
-          {canRollback && !rollbackOpen && (
-            <button
-              onClick={() => setRollbackOpen(true)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Вернуть на предыдущий этап
-            </button>
-          )}
-          {canRollback && rollbackOpen && (
-            <div className="rounded-xl border border-border bg-slate-50/60 p-3 space-y-2">
-              <div className="text-xs font-medium text-foreground">
-                Укажите причину отката этапа
-              </div>
-              <textarea
-                value={rollbackComment}
-                onChange={(e) => setRollbackComment(e.target.value)}
-                rows={2}
-                placeholder="Комментарий обязателен"
-                className="w-full resize-none rounded-md border border-border bg-white px-2.5 py-1.5 text-xs outline-none focus:border-foreground/30"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleRollback}
-                  disabled={!rollbackComment.trim()}
-                  className="rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background disabled:opacity-40"
-                >
-                  Подтвердить откат
-                </button>
-                <button
-                  onClick={() => {
-                    setRollbackOpen(false);
-                    setRollbackComment("");
-                  }}
-                  className="rounded-md border border-border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/40"
-                >
-                  Отмена
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* History */}
-        <section className="rounded-2xl border border-border bg-white p-4">
-          <div className="mb-3 flex items-center gap-2">
+        <section>
+          <div className="mb-2 flex items-center gap-1.5">
             <HistoryIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <h3 className="text-sm font-semibold">История этапов</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              История действий
+            </h3>
           </div>
           {history.length === 0 ? (
             <div className="text-xs text-muted-foreground">История пуста</div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-1.5">
               {history.slice(0, 3).map((h, i) => (
                 <li key={i} className="text-xs leading-snug text-muted-foreground">
                   <span className="text-foreground">{h.date}</span> · {h.action} ·{" "}
@@ -247,125 +371,42 @@ export function DebtProcessDrawer({
   );
 }
 
-function SummaryItem({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Chip({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div>
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={`mt-0.5 text-sm font-medium ${accent ? "text-amber-700" : "text-foreground"}`}>
+    <div className="flex items-baseline gap-1">
+      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}:</span>
+      <span className={`text-xs font-medium ${accent ? "text-amber-700" : "text-foreground"}`}>
         {value}
-      </div>
+      </span>
     </div>
   );
 }
 
-function StepCard({
-  step,
-  globalIndex,
-  animating,
-  animTick,
-}: {
-  step: CollectionSubStep;
-  globalIndex: number;
-  animating: boolean;
-  animTick?: number;
-}) {
-  const meta = stepMetaByTitle[step.title];
-  const isCurrent = step.status === "current";
-  const isDone = step.status === "done";
-  const dueDate = useMemo(() => {
-    if (!isCurrent || !meta || !step.startDate) return null;
-    return computeDue(step.startDate, meta);
-  }, [isCurrent, meta, step.startDate]);
-  const remaining = dueDate ? diffDays(TODAY, dueDate) : null;
-  const overdue = remaining !== null && remaining < 0;
-
+function StatusBadge({ status, overdue }: { status: StepStatus; overdue: boolean }) {
+  if (status === "current") {
+    return (
+      <span
+        className={`shrink-0 inline-flex items-center rounded-full px-2 h-5 text-[11px] font-medium ${
+          overdue
+            ? "bg-amber-50 text-amber-800 border border-amber-100"
+            : "bg-primary/10 text-primary border border-primary/15"
+        }`}
+      >
+        {overdue ? "Просрочен" : "Текущий"}
+      </span>
+    );
+  }
+  if (status === "done") {
+    return (
+      <span className="shrink-0 inline-flex items-center rounded-full px-2 h-5 text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+        Завершён
+      </span>
+    );
+  }
   return (
-    <div
-      className={`rounded-xl border p-3 transition-all duration-500 ${
-        isCurrent
-          ? "border-emerald-200 bg-emerald-50/30"
-          : isDone
-            ? "border-border bg-white"
-            : "border-border bg-white"
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          key={`dot-${animTick ?? "static"}-${step.id}`}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition-transform duration-500 ${
-            isCurrent
-              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-              : "border-border bg-white text-muted-foreground"
-          } ${animating ? "scale-110" : "scale-100"}`}
-        >
-          {globalIndex + 1}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div
-            className={`text-sm leading-tight ${
-              isCurrent
-                ? "font-semibold text-foreground"
-                : isDone
-                  ? "text-muted-foreground line-through decoration-muted-foreground/40"
-                  : "text-muted-foreground"
-            }`}
-          >
-            {step.title}
-          </div>
-          {meta && (
-            <div className="mt-1 text-[11px] text-muted-foreground">{meta.description}</div>
-          )}
-          {(meta || isCurrent) && (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-              {meta?.slaLabel && (
-                <span>
-                  SLA: <b className="text-foreground">{meta.slaLabel}</b>
-                </span>
-              )}
-              {isCurrent && step.startDate && (
-                <span>
-                  Старт: <b className="text-foreground">{step.startDate}</b>
-                </span>
-              )}
-              {isCurrent && dueDate && (
-                <span>
-                  План: <b className="text-foreground">{formatDDMMYYYY(dueDate)}</b>
-                </span>
-              )}
-              {isCurrent && remaining !== null && (
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
-                    overdue
-                      ? "bg-amber-100 text-amber-900"
-                      : "bg-emerald-50 text-emerald-800"
-                  }`}
-                >
-                  {overdue ? (
-                    <>
-                      <AlertTriangle className="h-3 w-3" /> Срок истёк на {Math.abs(remaining)} дн.
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="h-3 w-3" /> Осталось {remaining} дн.
-                    </>
-                  )}
-                </span>
-              )}
-              {isCurrent && !dueDate && meta?.slaType === "none" && (
-                <span className="rounded-full bg-muted px-2 py-0.5">Без SLA</span>
-              )}
-            </div>
-          )}
-          {isCurrent && meta?.control && (
-            <div className="mt-2 rounded-md bg-muted/50 px-2.5 py-1.5 text-[11px] text-muted-foreground">
-              <span className="text-muted-foreground">Контроль: </span>
-              <span className="text-foreground">{meta.control}</span>
-            </div>
-          )}
-        </div>
-        {isDone && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
-      </div>
-    </div>
+    <span className="shrink-0 inline-flex items-center rounded-full px-2 h-5 text-[11px] font-medium bg-muted text-muted-foreground">
+      Ожидает
+    </span>
   );
 }
 
