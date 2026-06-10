@@ -254,10 +254,19 @@ export function AssessmentModal({
           {/* Header */}
           <div className={cn("relative shrink-0 px-5 pt-6 pb-6 lg:px-10", meta.headerBg)}>
             <div className="absolute right-5 top-5 flex items-center gap-2">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
+                  aria-label="Вернуться назад"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
               <button
-                onClick={() => onOpenChange(false)}
+                onClick={() => (onCloseFlow ? onCloseFlow() : onOpenChange(false))}
                 className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
-                aria-label="Закрыть"
+                aria-label="Закрыть и вернуться на главный экран"
               >
                 <X className="h-4 w-4" />
               </button>
