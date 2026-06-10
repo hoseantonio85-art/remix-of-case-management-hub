@@ -895,6 +895,7 @@ export default function Index() {
         status={manualStatus}
         disagreement={manualDisagreement}
         defaultInn={manualAssessment?.inn}
+        positive={manualFlowTarget?.status === "no_risk"}
         onConfirm={() => setManualStatus("confirmed")}
         onDisagree={(d) => {
           setManualDisagreement(d);
