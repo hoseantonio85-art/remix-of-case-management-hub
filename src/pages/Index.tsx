@@ -874,14 +874,14 @@ export default function Index() {
           <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="S"
               onClick={() => setRunDialogOpen(false)}
               disabled={runLoading}
             >
               Отмена
             </Button>
             <Button
-              size="sm"
+              size="S"
               onClick={handleStartAssessment}
               disabled={runLoading || !runInn.trim()}
             >

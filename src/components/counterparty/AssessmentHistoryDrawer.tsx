@@ -289,8 +289,8 @@ export function AssessmentHistoryDrawer({
             </p>
           </div>
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="S"
             onClick={handleDownloadAll}
             className="shrink-0 h-8 gap-1.5 rounded-full text-xs"
           >

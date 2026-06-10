@@ -176,7 +176,7 @@ export function RiskDrawer({
           </div>
 
           <div className="flex gap-3 pt-1">
-            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+            <Button variant="secondary" className="flex-1" onClick={() => onOpenChange(false)}>
               Отмена
             </Button>
             <Button className="flex-1" disabled={!canSave} onClick={handleSave}>

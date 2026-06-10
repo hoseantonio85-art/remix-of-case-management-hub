@@ -359,7 +359,7 @@ export function ContractDrawer({
           <div className="mt-4 border-t border-border pt-4">
             {!editing ? (
               <Button
-                variant="outline"
+                variant="secondary"
                 className="w-full"
                 onClick={() => {
                   setEditing(true);
@@ -439,8 +439,8 @@ export function ContractDrawer({
           <div className="mb-3 flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">История просрочек</div>
             <Button
-              variant="outline"
-              size="sm"
+              variant="secondary"
+              size="S"
               className="h-8 px-3 text-xs"
               onClick={() => {
                 setShowAddOverdue((v) => !v);
@@ -521,7 +521,7 @@ export function ContractDrawer({
               )}
               <div className="mt-3 flex items-center gap-2">
                 <Button
-                  size="sm"
+                  size="S"
                   className="flex-1"
                   onClick={handleAddOverdue}
                   disabled={!amount || !occurDate}
@@ -529,7 +529,7 @@ export function ContractDrawer({
                   Добавить запись
                 </Button>
                 <Button
-                  size="sm"
+                  size="S"
                   variant="ghost"
                   onClick={() => {
                     setShowAddOverdue(false);
@@ -632,8 +632,8 @@ function FieldInput({
           </div>
         ) : (
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="S"
             className="w-full"
             onClick={() => onChange(`${field.label}.pdf`)}
           >

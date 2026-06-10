@@ -333,7 +333,7 @@ export function AssessmentModal({
                   ? "bg-gradient-to-br from-emerald-50/60 via-white to-white"
                   : "bg-gradient-to-br from-rose-50/60 via-white to-white",
               )}>
-                <NormAssistantIcon size="lg" tone={positive ? "emerald" : "rose"} />
+                <NormAssistantIcon size="L" tone={positive ? "emerald" : "rose"} />
                 <div className="min-w-0 flex-1">
                   <div className="mt-1 text-lg font-semibold text-slate-900">
                     Обоснование оценки
@@ -413,7 +413,7 @@ export function AssessmentModal({
                   )}
 
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={handleRerunAssessment}
                     disabled={isReassessmentRunning}
                     className="h-11 w-full rounded-full border bg-white text-sm font-medium"
@@ -558,7 +558,7 @@ export function AssessmentModal({
                 </Button>
               ) : (
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   onClick={handleDisagreeClick}
                   className="h-12 flex-1 rounded-full text-sm font-medium"
                 >
@@ -566,7 +566,7 @@ export function AssessmentModal({
                 </Button>
               )}
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={handleDownload}
                 className="h-12 flex-1 rounded-full text-sm font-medium"
               >
