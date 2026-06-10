@@ -886,6 +886,12 @@ export default function Index() {
         assessment={manualAssessment}
         open={manualAssessmentOpen}
         onOpenChange={handleManualAssessmentOpenChange}
+        onCloseFlow={() => {
+          setManualAssessmentOpen(false);
+          setManualFlowCpOpen(false);
+          setManualFlowTarget(null);
+          setManualDisagreement(null);
+        }}
         status={manualStatus}
         disagreement={manualDisagreement}
         defaultInn={manualAssessment?.inn}

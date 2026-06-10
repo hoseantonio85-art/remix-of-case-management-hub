@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
+import { X, ArrowLeft, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
 import { NormAssistantIcon } from "./NormAssistantIcon";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,6 +85,8 @@ export function AssessmentModal({
   onRun,
   onConfirm,
   onDisagree,
+  onBack,
+  onCloseFlow,
 }: {
   assessment: Assessment | null;
   open: boolean;
@@ -96,6 +98,8 @@ export function AssessmentModal({
   onRun?: (inn: string) => void;
   onConfirm: () => void;
   onDisagree: (d: Disagreement) => void;
+  onBack?: () => void;
+  onCloseFlow?: () => void;
 }) {
   const [notice, setNotice] = useState<{ tone: "success" | "info"; text: string } | null>(null);
   const [groupDrawer, setGroupDrawer] = useState<AssessmentGroup | null>(null);
@@ -250,10 +254,19 @@ export function AssessmentModal({
           {/* Header */}
           <div className={cn("relative shrink-0 px-5 pt-6 pb-6 lg:px-10", meta.headerBg)}>
             <div className="absolute right-5 top-5 flex items-center gap-2">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
+                  aria-label="Вернуться назад"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
               <button
-                onClick={() => onOpenChange(false)}
+                onClick={() => (onCloseFlow ? onCloseFlow() : onOpenChange(false))}
                 className="rounded-full bg-white p-1.5 text-muted-foreground hover:bg-muted"
-                aria-label="Закрыть"
+                aria-label="Закрыть и вернуться на главный экран"
               >
                 <X className="h-4 w-4" />
               </button>
