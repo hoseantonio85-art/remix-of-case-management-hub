@@ -303,7 +303,7 @@ export default function Index() {
       const target: Counterparty = existing ?? buildNewCounterparty(innRaw, today);
       setManualFlowTarget(target);
       setManualFlowIsNew(!existing);
-      setManualAssessment(buildAssessment(target.name, innRaw, "manual", today));
+      setManualAssessment(buildAssessment(target.name, innRaw, "manual", today, target.status === "no_risk" ? "positive" : "negative"));
       setManualStatus("updated");
       setManualDisagreement(null);
       setRunLoading(false);
