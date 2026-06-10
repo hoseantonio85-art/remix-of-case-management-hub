@@ -80,7 +80,7 @@ export function AssistantSummaryCard({
   return (
     <div className={`rounded-2xl border ${m.borderCls} bg-white p-4 shadow-sm`}>
       <div className="flex items-start gap-3">
-        <NormAssistantIcon size="S" />
+        <NormAssistantIcon size="sm" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">

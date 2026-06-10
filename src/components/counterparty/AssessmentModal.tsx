@@ -333,7 +333,7 @@ export function AssessmentModal({
                   ? "bg-gradient-to-br from-emerald-50/60 via-white to-white"
                   : "bg-gradient-to-br from-rose-50/60 via-white to-white",
               )}>
-                <NormAssistantIcon size="L" tone={positive ? "emerald" : "rose"} />
+                <NormAssistantIcon size="lg" tone={positive ? "emerald" : "rose"} />
                 <div className="min-w-0 flex-1">
                   <div className="mt-1 text-lg font-semibold text-slate-900">
                     Обоснование оценки
