@@ -28,6 +28,7 @@ import {
 } from "./DebtProcessDrawer";
 import { stepMetaByTitle } from "@/lib/debt-process";
 import { getToneForTag, toneStyles } from "./header-theme";
+import { CounterpartyStatusBadge } from "./CounterpartyStatusBadge";
 import { getCounterpartyProblemIndicators, problemIndicatorMeta } from "@/lib/problem-indicators";
 import { ResolutionCard } from "./ResolutionCard";
 import { AssessmentModal, type AssessmentStatus, type Disagreement } from "./AssessmentModal";
