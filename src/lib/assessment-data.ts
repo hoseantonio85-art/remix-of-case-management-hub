@@ -1,58 +1,22 @@
-export type AssessmentTagCategory = "attention" | "info" | "clear";
+export type CriterionStatus = "risk" | "clear" | "no_data";
 
-export type AssessmentTagColor = "red" | "orange" | "green" | "blue" | "gray";
+export const statusFromPassed = (p: boolean | null): CriterionStatus =>
+  p === false ? "risk" : p === true ? "clear" : "no_data";
 
-export type AssessmentTag =
-  | "Критичный риск"
-  | "Менее 6 месяцев"
-  | "Выявлен долг"
-  | "91% (Повышен)"
-  | "Не найдено"
-  | "Соответствует"
-  | "Не найдены"
-  | "Без изменений"
-  | "Ограничений нет"
-  | "Не найден"
-  | "Риски отсутствуют"
-  | "Не обнаружено"
-  | "Совпадение (Инфо)"
-  | "Негатива: 0"
-  | "Негатива: 2";
-
-export const tagMeta: Record<
-  AssessmentTag,
-  { color: AssessmentTagColor; category: AssessmentTagCategory }
+export const criterionStatusMeta: Record<
+  CriterionStatus,
+  { label: string; chip: string }
 > = {
-  "Критичный риск": { color: "red", category: "attention" },
-  "Менее 6 месяцев": { color: "orange", category: "attention" },
-  "Выявлен долг": { color: "orange", category: "attention" },
-  "91% (Повышен)": { color: "orange", category: "attention" },
-  "Негатива: 2": { color: "gray", category: "attention" },
-  "Совпадение (Инфо)": { color: "blue", category: "info" },
-  "Негатива: 0": { color: "gray", category: "clear" },
-  "Не найдено": { color: "green", category: "clear" },
-  "Соответствует": { color: "green", category: "clear" },
-  "Не найдены": { color: "green", category: "clear" },
-  "Без изменений": { color: "green", category: "clear" },
-  "Ограничений нет": { color: "green", category: "clear" },
-  "Не найден": { color: "green", category: "clear" },
-  "Риски отсутствуют": { color: "green", category: "clear" },
-  "Не обнаружено": { color: "green", category: "clear" },
-};
-
-export const tagColorClass: Record<AssessmentTagColor, string> = {
-  red: "bg-red-50 text-red-600",
-  orange: "bg-amber-50 text-amber-600",
-  green: "bg-emerald-50 text-emerald-600",
-  blue: "bg-sky-50 text-sky-600",
-  gray: "bg-slate-100 text-slate-500",
+  risk: { label: "Выявлен риск", chip: "bg-rose-50 text-rose-700" },
+  clear: { label: "Нарушений нет", chip: "bg-emerald-50 text-emerald-700" },
+  no_data: { label: "Нет данных", chip: "bg-slate-100 text-slate-600" },
 };
 
 export type AssessmentCriterion = {
   number: number;
   title: string;
-  tag: AssessmentTag;
-  comment?: string;
+  passed: boolean | null;
+  reason: string;
   source?: string;
 };
 
@@ -62,7 +26,6 @@ export type AssessmentGroup = {
   id: AssessmentGroupId;
   title: string;
   description: string;
-  total: number;
   criteria: AssessmentCriterion[];
 };
 
@@ -84,61 +47,70 @@ export type Assessment = {
   groups: AssessmentGroup[];
 };
 
+const NO_DATA_REASON = "Нет данных для проверки";
+const OK_REASON = "Нарушений не выявлено";
+
+const FIN_REASON =
+  "По найденной информации выявлены признаки финансовой неустойчивости: оперативное погашение краткосрочных обязательств невозможно, активы сформированы в основном за счет привлеченных средств, имеется просроченная кредиторская или дебиторская задолженность.";
+const HEAD_REASON =
+  "По найденной информации за последние 6 месяцев произошла смена директора компании.";
+
 const legal: AssessmentGroup = {
   id: "legal",
   title: "Юридический статус и правоспособность",
-  description: "Проверка статуса ЮЛ, регистрации, ограничений и права заключать договор",
-  total: 10,
+  description:
+    "Проверка статуса ЮЛ, регистрации, ограничений и права заключать договор",
   criteria: [
-    { number: 1, title: "ЮЛ ликвидировано / в процессе ликвидации / реорганизации путём присоединения", tag: "Критичный риск", source: "ЕГРЮЛ" },
-    { number: 2, title: "ЮЛ в процедуре банкротства / банкрот / подавало заявление", tag: "Не найдено" },
-    { number: 3, title: "Деятельность приостановлена по КоАП РФ", tag: "Не найдено" },
-    { number: 4, title: "Решение о приостановлении деятельности или оспаривание", tag: "Не найдено" },
-    { number: 5, title: "Ограничения по счетам от ФНС", tag: "Ограничений нет", source: "ФНС" },
-    { number: 6, title: "Недостоверный адрес в ЕГРЮЛ", tag: "Соответствует", source: "ЕГРЮЛ" },
-    { number: 7, title: "Адрес массовой регистрации, кроме БЦ", tag: "Не найден" },
-    { number: 8, title: "Смена юрадреса в течение года", tag: "Без изменений" },
-    { number: 9, title: "С даты регистрации <6 месяцев", tag: "Менее 6 месяцев" },
-    { number: 10, title: "Отсутствие нужных ОКВЭД под договор / ТЗ", tag: "Соответствует" },
+    { number: 1, title: "Ликвидация или реорганизация", passed: true, reason: OK_REASON },
+    { number: 2, title: "Банкротство ЮЛ", passed: true, reason: OK_REASON },
+    { number: 3, title: "Деятельность приостановлена по КоАП РФ", passed: null, reason: NO_DATA_REASON },
+    { number: 4, title: "Решение о приостановлении деятельности", passed: null, reason: NO_DATA_REASON },
+    { number: 5, title: "Ограничения по счетам от ФНС", passed: null, reason: NO_DATA_REASON },
+    { number: 6, title: "Недостоверный адрес в ЕГРЮЛ", passed: true, reason: OK_REASON },
+    { number: 7, title: "Адрес массовой регистрации", passed: null, reason: NO_DATA_REASON },
+    { number: 8, title: "Смена юрадреса в течение года", passed: null, reason: NO_DATA_REASON },
+    { number: 9, title: "С даты регистрации менее 6 месяцев", passed: null, reason: NO_DATA_REASON },
+    { number: 10, title: "Отсутствие нужных ОКВЭД под договор", passed: null, reason: NO_DATA_REASON },
   ],
 };
 
 const management: AssessmentGroup = {
   id: "management",
   title: "Руководство и бенефициары",
-  description: "Проверка руководителей, учредителей, связей и изменений в управлении",
-  total: 11,
+  description:
+    "Проверка руководителей, учредителей, связей и изменений в управлении",
   criteria: [
-    { number: 1, title: "ФИО руководителей в реестре дисквалифицированных лиц", tag: "Не найдены" },
-    { number: 2, title: "Недостоверные сведения о руководителе или учредителе по ФНС", tag: "Соответствует", source: "ФНС" },
-    { number: 3, title: "Банкротство физлица, руководителя или учредителя, за 12 месяцев", tag: "Не найдено" },
-    { number: 4, title: "Судимость руководителя или учредителя за экономические преступления", tag: "Не обнаружено" },
-    { number: 5, title: "Среди учредителей / руководителей найдены иностранные лица", tag: "Совпадение (Инфо)" },
-    { number: 6, title: "Одно лицо = учредитель и руководитель", tag: "Совпадение (Инфо)" },
-    { number: 7, title: ">10 ЮЛ с тем же руководителем", tag: "Негатива: 0" },
-    { number: 8, title: ">10 ЮЛ с тем же учредителем-физлицом", tag: "Негатива: 0" },
-    { number: 9, title: "Смена руководителя в течение года", tag: "Без изменений" },
-    { number: 10, title: "Смена управляющей компании в течение года", tag: "Без изменений" },
-    { number: 11, title: "Отсутствие маркеров из I–III групп", tag: "Риски отсутствуют" },
+    { number: 1, title: "Дисквалификация руководителей", passed: true, reason: OK_REASON },
+    { number: 2, title: "Недостоверные сведения о руководителе/учредителе", passed: true, reason: OK_REASON },
+    { number: 3, title: "Банкротство физлица (руководитель/учредитель)", passed: true, reason: OK_REASON },
+    { number: 4, title: "Судимость за экономические преступления", passed: null, reason: NO_DATA_REASON },
+    { number: 5, title: "Иностранные учредители/руководители", passed: null, reason: NO_DATA_REASON },
+    { number: 6, title: "Совпадение учредителя и руководителя", passed: null, reason: NO_DATA_REASON },
+    { number: 7, title: "Массовость руководителя", passed: true, reason: OK_REASON },
+    { number: 8, title: "Массовость учредителя", passed: true, reason: OK_REASON },
+    { number: 9, title: "Смена руководителя в течение года", passed: false, reason: HEAD_REASON },
+    { number: 10, title: "Смена управляющей компании в течение года", passed: null, reason: NO_DATA_REASON },
+    { number: 11, title: "Отсутствие маркеров из I–III групп", passed: false, reason: "Обнаружены риски в группах 1–3" },
   ],
 };
 
 const finance: AssessmentGroup = {
   id: "finance",
   title: "Финансы и налоги",
-  description: "Проверка налоговой дисциплины, долгов, выручки и финансовой устойчивости",
-  total: 10,
+  description:
+    "Проверка налоговой дисциплины, долгов, выручки и финансовой устойчивости",
   criteria: [
-    { number: 1, title: "Не сдаёт налоговую отчётность >1 года", tag: "Не найдено" },
-    { number: 2, title: "Неоплаченная налоговая задолженность", tag: "Выявлен долг", source: "ФНС" },
-    { number: 3, title: "Доля вычитаемого НДС >89%", tag: "91% (Повышен)" },
-    { number: 4, title: "Обязательства >30% выручки", tag: "Соответствует" },
-    { number: 5, title: "Снижение выручки >50%", tag: "Не обнаружено" },
-    { number: 6, title: "Численность недостаточна для договора", tag: "Соответствует" },
-    { number: 7, title: "Уставной капитал ≤50 тыс. руб.", tag: "Соответствует" },
-    { number: 8, title: "С даты регистрации прошло 12 месяцев", tag: "Соответствует" },
-    { number: 9, title: "Положительный опыт с компаниями холдинга", tag: "Соответствует" },
-    { number: 10, title: "Госконтракты за 12 месяцев при выручке >100 млн руб.", tag: "Соответствует" },
+    { number: 1, title: "Непредставление налоговой отчётности более 1 года", passed: true, reason: OK_REASON },
+    { number: 2, title: "Неоплаченная налоговая задолженность", passed: null, reason: NO_DATA_REASON },
+    { number: 3, title: "Высокая доля вычитаемого НДС", passed: null, reason: NO_DATA_REASON },
+    { number: 4, title: "Обязательства более 30% выручки", passed: null, reason: NO_DATA_REASON },
+    { number: 5, title: "Снижение выручки более 50%", passed: null, reason: NO_DATA_REASON },
+    { number: 6, title: "Недостаточная численность работников", passed: null, reason: NO_DATA_REASON },
+    { number: 7, title: "Уставной капитал не более 50 тыс. руб.", passed: null, reason: NO_DATA_REASON },
+    { number: 8, title: "С даты регистрации прошло 12 месяцев", passed: null, reason: NO_DATA_REASON },
+    { number: 9, title: "Положительный опыт с компаниями холдинга", passed: null, reason: NO_DATA_REASON },
+    { number: 10, title: "Наличие госконтрактов", passed: null, reason: NO_DATA_REASON },
+    { number: 11, title: "Финансовый анализ на данных отчётности", passed: false, reason: FIN_REASON },
   ],
 };
 
@@ -146,20 +118,20 @@ const court: AssessmentGroup = {
   id: "court",
   title: "Судебная нагрузка и репутация",
   description: "Проверка судебных, исполнительных и репутационных факторов",
-  total: 12,
   criteria: [
-    { number: 1, title: "Списки терроризма / экстремизма", tag: "Не найден" },
-    { number: 2, title: "Список иноагентов", tag: "Не найден" },
-    { number: 3, title: "Ст. 19.28 КоАП — незаконное вознаграждение", tag: "Не обнаружено" },
-    { number: 4, title: "Реестр недобросовестных поставщиков", tag: "Не найдено", source: "ФАС" },
-    { number: 5, title: "Исполнительные производства >10% выручки", tag: "Негатива: 2" },
-    { number: 6, title: "Сумма арбитражных дел ответчиком значительная", tag: "Негатива: 2" },
-    { number: 7, title: "Требования к ответчику >10% выручки", tag: "Соответствует" },
-    { number: 8, title: "Налоговый спор в суде, ответчик", tag: "Не найдено" },
-    { number: 9, title: "Банкротство физлица-ИП за 12 месяцев", tag: "Не найдено" },
-    { number: 10, title: "Претензии / санкции от госорганов", tag: "Не обнаружено" },
-    { number: 11, title: "Иная негативная репутационная информация", tag: "Не обнаружено" },
-    { number: 12, title: "3+ фактора из III группы", tag: "Не обнаружено" },
+    { number: 1, title: "Терроризм / экстремизм", passed: true, reason: OK_REASON },
+    { number: 2, title: "Список иноагентов", passed: null, reason: NO_DATA_REASON },
+    { number: 3, title: "Административная ответственность ст. 19.28 КоАП", passed: true, reason: OK_REASON },
+    { number: 4, title: "Недобросовестный поставщик", passed: true, reason: OK_REASON },
+    { number: 5, title: "Исполнительные производства более 10% выручки", passed: null, reason: NO_DATA_REASON },
+    { number: 6, title: "Значительные арбитражные дела (ответчик)", passed: null, reason: NO_DATA_REASON },
+    { number: 7, title: "Требования к ответчику более 10% выручки", passed: null, reason: NO_DATA_REASON },
+    { number: 8, title: "Налоговый спор в суде", passed: null, reason: NO_DATA_REASON },
+    { number: 9, title: "Банкротство физлица-ИП за 12 мес.", passed: null, reason: NO_DATA_REASON },
+    { number: 10, title: "Претензии / санкции от госорганов", passed: null, reason: NO_DATA_REASON },
+    { number: 11, title: "Иная негативная репутационная информация", passed: true, reason: OK_REASON },
+    { number: 12, title: "3 и более фактора из III группы", passed: true, reason: OK_REASON },
+    { number: 13, title: "Информация об арбитражных исках", passed: true, reason: OK_REASON },
   ],
 };
 
@@ -178,28 +150,24 @@ export function buildAssessment(
     nextCheck: source === "auto" ? "завтра" : undefined,
     source,
     summary:
-      "По результатам оценки выявлены критические факторы по юридическому статусу, повышенная доля вычитаемого НДС и налоговая задолженность. Также есть информационные совпадения по учредителям и активность в исполнительных производствах.",
-    changes: [
-      { text: "Появились ограничения ФНС по банковским счетам", tone: "rose" },
-      { text: "Обнаружен новый налоговый спор", tone: "amber" },
-      { text: "Изменился юридический адрес", tone: "slate" },
-      { text: "Добавлены сведения о смене руководителя", tone: "slate" },
-    ],
+      "По результатам оценки выявлены критические факторы по руководству и финансовой устойчивости.",
+    changes: [],
     groups: defaultGroups,
   };
 }
 
-export function groupCounts(g: AssessmentGroup) {
-  let attention = 0;
-  let info = 0;
+export type GroupCounts = { risk: number; clear: number; no_data: number };
+
+export function groupCounts(g: AssessmentGroup): GroupCounts {
+  let risk = 0;
   let clear = 0;
+  let no_data = 0;
   for (const c of g.criteria) {
-    const cat = tagMeta[c.tag].category;
-    if (cat === "attention") attention++;
-    else if (cat === "info") info++;
-    else clear++;
+    if (c.passed === false) risk++;
+    else if (c.passed === true) clear++;
+    else no_data++;
   }
-  return { attention, info, clear };
+  return { risk, clear, no_data };
 }
 
 export const toneStyles: Record<

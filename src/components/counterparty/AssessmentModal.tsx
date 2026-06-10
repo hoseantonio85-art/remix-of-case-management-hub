@@ -462,9 +462,9 @@ export function AssessmentModal({
                               )}
                             </div>
                             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                              <CountPill kind="attention" count={counts.attention} />
-                              {counts.info > 0 && <CountPill kind="info" count={counts.info} />}
+                              <CountPill kind="risk" count={counts.risk} />
                               <CountPill kind="clear" count={counts.clear} />
+                              <CountPill kind="no_data" count={counts.no_data} />
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
