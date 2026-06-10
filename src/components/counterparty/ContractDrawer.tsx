@@ -649,7 +649,7 @@ function FieldInput({
       <Input
         placeholder={field.placeholder ?? (field.type === "date" ? "ДД.ММ.ГГГГ" : "")}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(v) => onChange(v)}
       />
     </div>
   );
@@ -716,7 +716,7 @@ function LabeledInput({
       <div className="mb-1 text-xs text-muted-foreground">{label}</div>
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(v) => onChange(v)}
         placeholder={placeholder}
       />
     </div>
