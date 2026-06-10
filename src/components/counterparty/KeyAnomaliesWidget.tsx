@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type AnomalySeverity = "block" | "amplify" | "context";
@@ -56,29 +56,40 @@ const anomalies: Anomaly[] = [
   },
 ];
 
+const VISIBLE_COUNT = 2;
+const DESCRIPTION = "Факторы, которые повлияли на резолюцию «Не заключать сделки».";
+
 export function KeyAnomaliesWidget() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
-  const counts = anomalies.reduce(
-    (acc, a) => {
-      acc[a.severity] += 1;
-      return acc;
-    },
-    { block: 0, amplify: 0, context: 0 } as Record<AnomalySeverity, number>,
-  );
+  const visible = expanded ? anomalies : anomalies.slice(0, VISIBLE_COUNT);
+  const hiddenCount = anomalies.length - VISIBLE_COUNT;
+
+  const handleToggleExpand = () => {
+    if (expanded && openId) {
+      const stillVisible = anomalies.slice(0, VISIBLE_COUNT).some((a) => a.id === openId);
+      if (!stillVisible) setOpenId(null);
+    }
+    setExpanded((v) => !v);
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-white p-4">
-      <div className="text-sm font-semibold text-foreground">Ключевые аномалии</div>
-      <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-        Факторы, повлиявшие на резолюцию «Не заключать сделки».
-      </p>
-      <div className="mt-2 text-[11px] text-muted-foreground">
-        {counts.block} блокируют сделку · {counts.amplify} усиливает риск · {counts.context} контекст
+      <div className="flex items-center gap-1.5">
+        <div className="text-sm font-semibold text-foreground">Ключевые аномалии</div>
+        <span
+          tabIndex={0}
+          title={DESCRIPTION}
+          aria-label={DESCRIPTION}
+          className="inline-flex cursor-help text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </span>
       </div>
 
-      <ul className="mt-3 space-y-2">
-        {anomalies.map((a) => {
+      <ul className="mt-2.5 space-y-1.5">
+        {visible.map((a) => {
           const isOpen = openId === a.id;
           const meta = severityMeta[a.severity];
           return (
@@ -94,18 +105,16 @@ export function KeyAnomaliesWidget() {
               >
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-sm font-medium text-foreground">{a.title}</span>
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium",
-                          meta.chip,
-                        )}
-                      >
-                        {meta.label}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-xs leading-snug text-muted-foreground">{a.short}</div>
+                    <span
+                      className={cn(
+                        "inline-flex h-5 items-center rounded-full px-2 text-[11px] font-medium",
+                        meta.chip,
+                      )}
+                    >
+                      {meta.label}
+                    </span>
+                    <div className="mt-1 text-sm font-medium text-foreground">{a.title}</div>
+                    <div className="mt-0.5 text-xs leading-snug text-muted-foreground">{a.short}</div>
                     {isOpen && (
                       <div className="mt-2 text-xs leading-relaxed text-foreground/80">{a.full}</div>
                     )}
@@ -122,6 +131,16 @@ export function KeyAnomaliesWidget() {
           );
         })}
       </ul>
+
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={handleToggleExpand}
+          className="mt-2 text-xs font-medium text-foreground/70 hover:text-foreground"
+        >
+          {expanded ? "Свернуть" : `Показать ещё ${hiddenCount}`}
+        </button>
+      )}
     </div>
   );
 }
