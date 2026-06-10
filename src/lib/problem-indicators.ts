@@ -56,6 +56,9 @@ export function getCounterpartyProblemIndicators(
   c?: Counterparty | null,
 ): ProblemIndicatorKey[] {
   if (!c || !Array.isArray(c.risks)) return [];
+  // «Нет риска» counterparties never display problem indicators, regardless
+  // of any residual risk entries in mock data.
+  if (c.status === "no_risk") return [];
   const result: ProblemIndicatorKey[] = [];
   if (c.risks.some((r) => r?.type === "Банкротство / ликвидация")) {
     result.push("bankruptcy_liquidation");

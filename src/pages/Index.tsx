@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   ChevronDown,
@@ -251,17 +251,17 @@ const problemChips: { key: Exclude<RiskChipKey, "all">; meta: typeof riskMeta[Ri
   {
     key: "bankruptcy",
     meta: { ...riskMeta["Банкротство / ликвидация"], label: "Банкротство / ликвидация", short: "Банкротство / ликвидация" },
-    matches: (c) => c.risks.some((r) => r.type === "Банкротство / ликвидация"),
+    matches: (c) => c.status !== "no_risk" && c.risks.some((r) => r.type === "Банкротство / ликвидация"),
   },
   {
     key: "group",
     meta: { ...riskMeta["Неисполнение контракта группы"], label: "Неисполнение контракта группы", short: "Неисполнение контракта группы" },
-    matches: (c) => c.risks.some((r) => r.type === "Неисполнение контракта группы"),
+    matches: (c) => c.status !== "no_risk" && c.risks.some((r) => r.type === "Неисполнение контракта группы"),
   },
   {
     key: "negative",
     meta: { ...riskMeta["Ухудшилось финансовое состояние"], label: "Наличие негативных факторов", short: "Наличие негативных факторов" },
-    matches: (c) => c.risks.some((r) => NEGATIVE_RISK_TYPES.includes(r.type)),
+    matches: (c) => c.status !== "no_risk" && c.risks.some((r) => NEGATIVE_RISK_TYPES.includes(r.type)),
   },
 ];
 
@@ -400,11 +400,6 @@ export default function Index() {
     return byProcess.filter((c) => selectedTiles.has(c.status));
   }, [byProcess, selectedTiles]);
 
-  const showRiskChips = !(
-    selectedTiles.size === 1 &&
-    (selectedTiles.has("no_risk") || selectedTiles.has("overdue"))
-  );
-
   const riskCounts = useMemo(() => {
     const map: Record<string, number> = { all: byCategory.length };
     for (const chip of problemChips) {
@@ -413,12 +408,20 @@ export default function Index() {
     return map;
   }, [byCategory]);
 
+  // Auto-clear the active problem filter if it becomes unavailable
+  // after a debt-category selection change.
+  useEffect(() => {
+    if (riskFilter !== "all" && (riskCounts[riskFilter] ?? 0) === 0) {
+      setRiskFilter("all");
+    }
+  }, [riskCounts, riskFilter]);
+
   const filtered = useMemo(() => {
-    if (!showRiskChips || riskFilter === "all") return byCategory;
+    if (riskFilter === "all") return byCategory;
     const chip = problemChips.find((c) => c.key === riskFilter);
     if (!chip) return byCategory;
     return byCategory.filter(chip.matches);
-  }, [byCategory, riskFilter, showRiskChips]);
+  }, [byCategory, riskFilter]);
 
   // Donut data:
   //  - 0 selected   → overview (top categories)
@@ -667,60 +670,44 @@ export default function Index() {
               </div>
             )}
 
-            {showRiskChips && (
-              <div className="mb-5 flex flex-wrap gap-2">
-                {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
-                  const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
-                  const Icon = meta.icon;
-                  const count = riskCounts[key] ?? 0;
-                  const isActive = riskFilter === key;
-                  const disabled = key !== "all" && count === 0;
-                  return (
-                    <button
-                      key={key}
-                      disabled={disabled}
-                      onClick={() =>
-                        setRiskFilter(isActive && key !== "all" ? "all" : key)
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                        isActive
-                          ? `${meta.activeBg} ${meta.activeBorder} ${meta.activeText} shadow-sm`
-                          : `bg-white border-slate-200 text-slate-600 hover:bg-slate-50`
-                      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
+                const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
+                const Icon = meta.icon;
+                const count = riskCounts[key] ?? 0;
+                const isActive = riskFilter === key;
+                const disabled = key !== "all" && count === 0;
+                return (
+                  <button
+                    key={key}
+                    disabled={disabled}
+                    onClick={() =>
+                      setRiskFilter(isActive && key !== "all" ? "all" : key)
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      isActive
+                        ? `${meta.activeBg} ${meta.activeBorder} ${meta.activeText} shadow-sm`
+                        : `bg-white border-slate-200 text-slate-600 hover:bg-slate-50`
+                    } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+                  >
+                    <Icon
+                      className={`h-3.5 w-3.5 ${
+                        isActive ? meta.iconColor : meta.idleIconColor
+                      }`}
+                    />
+                    {meta.label}
+                    <span
+                      className={`rounded-full px-1.5 py-px text-[10px] ${
+                        isActive ? "bg-white/70" : "bg-slate-100 text-muted-foreground"
+                      }`}
                     >
-                      <Icon
-                        className={`h-3.5 w-3.5 ${
-                          isActive ? meta.iconColor : meta.idleIconColor
-                        }`}
-                      />
-                      {meta.label}
-                      <span
-                        className={`rounded-full px-1.5 py-px text-[10px] ${
-                          isActive ? "bg-white/70" : "bg-slate-100 text-muted-foreground"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            {selectedTiles.size > 0 && !processStage && (
-              <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                Фильтр:{" "}
-                <b className="text-foreground">
-                  {tiles.filter((t) => selectedTiles.has(t.key)).map((t) => t.title).join(", ")}
-                </b>
-                <button
-                  className="rounded-full border border-border bg-white px-2 py-0.5 text-[11px] hover:bg-accent"
-                  onClick={() => setSelectedTiles(new Set())}
-                >
-                  Сбросить
-                </button>
-              </div>
-            )}
 
             <div className="space-y-2.5">
               {filtered.length === 0 && (
