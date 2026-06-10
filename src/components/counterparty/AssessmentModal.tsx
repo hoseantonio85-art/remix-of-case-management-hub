@@ -590,6 +590,12 @@ export function AssessmentModal({
             inn={assessment.inn}
             ogrn={defaultOgrn}
           />
+
+          <AssessmentHistoryDrawer
+            open={historyOpen}
+            onOpenChange={setHistoryOpen}
+            positive={positive}
+          />
         </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
