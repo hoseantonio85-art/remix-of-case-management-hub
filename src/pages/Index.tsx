@@ -856,8 +856,8 @@ export default function Index() {
               <label className="text-[11px] font-medium text-muted-foreground">ИНН</label>
               <Input
                 value={runInn}
-                onChange={(e) => {
-                  setRunInn(e.target.value);
+                onChange={(v) => {
+                  setRunInn(v);
                   if (runError) setRunError(null);
                 }}
                 placeholder="Введите ИНН контрагента"
@@ -874,14 +874,14 @@ export default function Index() {
           <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="S"
               onClick={() => setRunDialogOpen(false)}
               disabled={runLoading}
             >
               Отмена
             </Button>
             <Button
-              size="sm"
+              size="S"
               onClick={handleStartAssessment}
               disabled={runLoading || !runInn.trim()}
             >

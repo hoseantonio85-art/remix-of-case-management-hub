@@ -40,8 +40,8 @@ export function ResolutionCard({
           </p>
           <div className="mt-3">
             <Button
-              size="sm"
-              variant="outline"
+              size="S"
+              variant="secondary"
               className={buttonClass}
               onClick={onDetailsClick}
             >

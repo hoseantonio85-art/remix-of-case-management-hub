@@ -1,11 +1,21 @@
 import * as React from "react";
 import { Button as ShadcnButton, type ButtonProps as ShadcnButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { resolveIcon, type IconName } from "./icon-registry";
 
 /**
- * Адаптер кнопки под контракт @sber-orm/ui-kit.
- * Поддерживает sber-варианты (primary/secondary/...) и устаревшие shadcn
- * (default/outline/ghost/...). После перехода на пакет — заменить на re-export.
+ * Адаптер кнопки под контракт @sber-orm/ui-kit (см. ALL_COMPONENTS.md → Button).
+ *
+ * Контракт API:
+ *  - variant: только sber-варианты (primary/secondary/tertiary/warning/danger/
+ *             ghost/ellipse/function/ai).
+ *  - size:    'XXS' | 'XS' | 'S' | 'M' | 'L' | 'XL'.
+ *  - icon / iconAfter: имя иконки (keyof typeof EIconName / string-алиас).
+ *  - iconOnly: boolean.
+ *  - link:    визуально как ссылка.
+ *
+ * Legacy shadcn-варианты (default/outline/destructive/link/sm/lg/icon)
+ * УБРАНЫ из публичного типа. После установки пакета — заменить на re-export.
  */
 export type ButtonVariant =
   | "primary"
@@ -16,22 +26,18 @@ export type ButtonVariant =
   | "ghost"
   | "ellipse"
   | "function"
-  | "ai"
-  // legacy shadcn passthroughs (временно поддержаны для совместимости)
-  | "default"
-  | "destructive"
-  | "outline"
-  | "link";
+  | "ai";
 
-export type ButtonSize = "XXS" | "XS" | "S" | "M" | "L" | "XL" | "default" | "sm" | "lg" | "icon";
+export type ButtonSize = "XXS" | "XS" | "S" | "M" | "L" | "XL";
 
 export interface ButtonProps extends Omit<ShadcnButtonProps, "variant" | "size"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
-  icon?: React.ReactNode;
-  iconAfter?: React.ReactNode;
-  iconOnly?: React.ReactNode;
+  icon?: IconName;
+  iconAfter?: IconName;
+  iconOnly?: boolean;
+  link?: boolean;
 }
 
 const variantMap: Record<string, ShadcnButtonProps["variant"]> = {
@@ -44,10 +50,6 @@ const variantMap: Record<string, ShadcnButtonProps["variant"]> = {
   ellipse: "secondary",
   function: "ghost",
   ai: "default",
-  default: "default",
-  destructive: "destructive",
-  outline: "outline",
-  link: "link",
 };
 
 const sizeMap: Record<string, ShadcnButtonProps["size"]> = {
@@ -57,22 +59,23 @@ const sizeMap: Record<string, ShadcnButtonProps["size"]> = {
   M: "default",
   L: "lg",
   XL: "lg",
-  default: "default",
-  sm: "sm",
-  lg: "lg",
-  icon: "icon",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "M", loading, icon, iconAfter, iconOnly, className, children, disabled, ...rest }, ref) => {
+  (
+    { variant = "primary", size = "M", loading, icon, iconAfter, iconOnly, link, className, children, disabled, ...rest },
+    ref,
+  ) => {
     const mappedVariant = variantMap[variant] ?? "default";
-    const mappedSize = iconOnly ? "icon" : sizeMap[size] ?? "default";
+    const mappedSize: ShadcnButtonProps["size"] = iconOnly ? "icon" : sizeMap[size] ?? "default";
     const isWarning = variant === "warning";
     const isAi = variant === "ai";
+    const IconLeft = icon ? resolveIcon(icon) : null;
+    const IconRight = iconAfter ? resolveIcon(iconAfter) : null;
     return (
       <ShadcnButton
         ref={ref}
-        variant={mappedVariant}
+        variant={link ? "link" : mappedVariant}
         size={mappedSize}
         disabled={disabled || loading}
         className={cn(
@@ -82,13 +85,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...rest}
       >
-        {iconOnly ?? (
-          <>
-            {icon}
-            {children}
-            {iconAfter}
-          </>
-        )}
+        {IconLeft ? <IconLeft className="h-4 w-4" /> : null}
+        {!iconOnly && children}
+        {IconRight ? <IconRight className="h-4 w-4" /> : null}
       </ShadcnButton>
     );
   },

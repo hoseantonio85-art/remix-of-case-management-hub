@@ -123,10 +123,10 @@ export function ProcessFilterDrawer({
         </div>
 
         <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200 bg-white px-6 py-3">
-          <Button variant="ghost" size="sm" onClick={reset}>
+          <Button variant="ghost" size="S" onClick={reset}>
             Сбросить
           </Button>
-          <Button size="sm" onClick={apply}>
+          <Button size="S" onClick={apply}>
             Применить
           </Button>
         </div>

@@ -58,6 +58,9 @@ export {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+// TODO(@sber-orm/ui-kit): мигрировать на единый Select с options/value/onChange и tree.
+// Текущие SelectTrigger/SelectContent/SelectItem оставлены как legacy-композиция
+// и НЕ должны использоваться в новом коде.
 export { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 export { Skeleton as Loader } from "@/components/ui/skeleton";

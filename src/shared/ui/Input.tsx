@@ -1,25 +1,41 @@
 import * as React from "react";
 import { Input as ShadcnInput } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { resolveIcon, type IconName } from "./icon-registry";
 
 /**
- * Адаптер Input под контракт @sber-orm/ui-kit.
- * Поддерживает label / helperText / error / icon / viewOnly / readonly.
+ * Адаптер Input под контракт @sber-orm/ui-kit (ALL_COMPONENTS.md → Input).
+ *
+ * Контракт:
+ *  - size: 'S' | 'M' | 'L' | 'XL'
+ *  - icon: keyof typeof EIconName (имя иконки строкой)
+ *  - onChange: (value: string, event: ChangeEvent, reason?: string) => void
+ *  - error: boolean (текст ошибки передаётся через helperText)
+ *  - viewOnly / readonly / label / labelInside / noBorder / tooltip / required
  */
+export type InputSize = "S" | "M" | "L" | "XL";
+
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "onChange"> {
   label?: React.ReactNode;
   helperText?: React.ReactNode;
-  error?: boolean | string;
-  size?: "XS" | "S" | "M" | "L";
+  error?: boolean;
+  size?: InputSize;
   viewOnly?: boolean;
-  icon?: React.ReactNode;
+  labelInside?: boolean;
+  noBorder?: boolean;
+  tooltip?: React.ReactNode;
+  icon?: IconName;
+  onChange?: (value: string, event: React.ChangeEvent<HTMLInputElement>, reason?: string) => void;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, helperText, error, size = "M", viewOnly, icon, className, readOnly, ...rest }, ref) => {
-    const errMsg = typeof error === "string" ? error : undefined;
+  (
+    { label, helperText, error, size = "M", viewOnly, labelInside, noBorder, tooltip, icon, className, readOnly, onChange, placeholder, ...rest },
+    ref,
+  ) => {
     const isErr = Boolean(error);
+    const IconCmp = icon ? resolveIcon(icon) : null;
     if (viewOnly) {
       return (
         <div className={cn("text-sm", className)}>
@@ -31,29 +47,33 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
     return (
       <label className={cn("block", className)}>
-        {label && <div className="mb-1 text-xs text-muted-foreground">{label}</div>}
+        {label && !labelInside && <div className="mb-1 text-xs text-muted-foreground">{label}</div>}
         <div className="relative">
-          {icon && (
+          {IconCmp && (
             <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
-              {icon}
+              <IconCmp className="h-4 w-4" />
             </span>
           )}
           <ShadcnInput
             ref={ref}
             readOnly={readOnly}
+            placeholder={labelInside && typeof label === "string" ? label : placeholder}
             aria-invalid={isErr || undefined}
+            onChange={(e) => onChange?.(e.target.value, e)}
             className={cn(
-              icon && "pl-8",
+              IconCmp && "pl-8",
+              noBorder && "border-0 shadow-none",
               isErr && "border-destructive focus-visible:ring-destructive",
             )}
             {...rest}
           />
         </div>
-        {(errMsg || helperText) && (
+        {helperText && (
           <div className={cn("mt-1 text-xs", isErr ? "text-destructive" : "text-muted-foreground")}>
-            {errMsg ?? helperText}
+            {helperText}
           </div>
         )}
+        {tooltip && <div className="sr-only">{tooltip}</div>}
       </label>
     );
   },

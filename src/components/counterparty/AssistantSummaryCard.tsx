@@ -113,7 +113,7 @@ export function AssistantSummaryCard({
           )}
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button size="sm" className="h-8 px-3 text-xs" onClick={onOpen}>
+            <Button size="S" className="h-8 px-3 text-xs" onClick={onOpen}>
               Открыть оценку
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>
