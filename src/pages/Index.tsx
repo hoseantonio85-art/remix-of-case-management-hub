@@ -751,7 +751,7 @@ export default function Index() {
                           })}
                       </div>
 
-                      <div className="text-sm font-semibold text-foreground">{c.name}</div>
+                      <div className="truncate text-sm font-semibold text-foreground">{c.name}</div>
                       <div className="text-[12px] text-muted-foreground">
                         {c.inn} · {c.contracts.length} дог. · {stage} · изм. {c.lastUpdate}
                       </div>
