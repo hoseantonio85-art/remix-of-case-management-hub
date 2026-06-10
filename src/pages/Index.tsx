@@ -670,60 +670,44 @@ export default function Index() {
               </div>
             )}
 
-            {showRiskChips && (
-              <div className="mb-5 flex flex-wrap gap-2">
-                {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
-                  const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
-                  const Icon = meta.icon;
-                  const count = riskCounts[key] ?? 0;
-                  const isActive = riskFilter === key;
-                  const disabled = key !== "all" && count === 0;
-                  return (
-                    <button
-                      key={key}
-                      disabled={disabled}
-                      onClick={() =>
-                        setRiskFilter(isActive && key !== "all" ? "all" : key)
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                        isActive
-                          ? `${meta.activeBg} ${meta.activeBorder} ${meta.activeText} shadow-sm`
-                          : `bg-white border-slate-200 text-slate-600 hover:bg-slate-50`
-                      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {(["all", ...problemChips.map((c) => c.key)] as RiskChipKey[]).map((key) => {
+                const meta = key === "all" ? allChipMeta : problemChips.find((c) => c.key === key)!.meta;
+                const Icon = meta.icon;
+                const count = riskCounts[key] ?? 0;
+                const isActive = riskFilter === key;
+                const disabled = key !== "all" && count === 0;
+                return (
+                  <button
+                    key={key}
+                    disabled={disabled}
+                    onClick={() =>
+                      setRiskFilter(isActive && key !== "all" ? "all" : key)
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      isActive
+                        ? `${meta.activeBg} ${meta.activeBorder} ${meta.activeText} shadow-sm`
+                        : `bg-white border-slate-200 text-slate-600 hover:bg-slate-50`
+                    } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+                  >
+                    <Icon
+                      className={`h-3.5 w-3.5 ${
+                        isActive ? meta.iconColor : meta.idleIconColor
+                      }`}
+                    />
+                    {meta.label}
+                    <span
+                      className={`rounded-full px-1.5 py-px text-[10px] ${
+                        isActive ? "bg-white/70" : "bg-slate-100 text-muted-foreground"
+                      }`}
                     >
-                      <Icon
-                        className={`h-3.5 w-3.5 ${
-                          isActive ? meta.iconColor : meta.idleIconColor
-                        }`}
-                      />
-                      {meta.label}
-                      <span
-                        className={`rounded-full px-1.5 py-px text-[10px] ${
-                          isActive ? "bg-white/70" : "bg-slate-100 text-muted-foreground"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            {selectedTiles.size > 0 && !processStage && (
-              <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                Фильтр:{" "}
-                <b className="text-foreground">
-                  {tiles.filter((t) => selectedTiles.has(t.key)).map((t) => t.title).join(", ")}
-                </b>
-                <button
-                  className="rounded-full border border-border bg-white px-2 py-0.5 text-[11px] hover:bg-accent"
-                  onClick={() => setSelectedTiles(new Set())}
-                >
-                  Сбросить
-                </button>
-              </div>
-            )}
 
             <div className="space-y-2.5">
               {filtered.length === 0 && (
