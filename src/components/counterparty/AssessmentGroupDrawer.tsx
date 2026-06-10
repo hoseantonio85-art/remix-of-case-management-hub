@@ -163,7 +163,8 @@ function SummaryStat({
 function CriterionCard({ c }: { c: AssessmentCriterion }) {
   const status: CriterionStatus = statusFromPassed(c.passed);
   const m = criterionStatusMeta[status];
-  const reason = c.reason ?? "";
+  const showReason = c.passed === false;
+  const reason = showReason ? (c.reason ?? "") : "";
   const isLong = reason.length > 100;
   const [expanded, setExpanded] = useState(false);
   return (
@@ -176,7 +177,7 @@ function CriterionCard({ c }: { c: AssessmentCriterion }) {
       <div className="mt-1.5 text-sm font-medium leading-snug text-slate-900">
         {c.title}
       </div>
-      {reason && (
+      {showReason && reason && (
         <>
           <div
             className={`mt-2 text-xs leading-relaxed text-slate-500 ${
