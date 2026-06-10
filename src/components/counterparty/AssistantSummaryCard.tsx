@@ -1,5 +1,5 @@
 import { Sparkles, ChevronRight, CheckCircle2, AlertTriangle, RotateCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui";
 import { NormAssistantIcon } from "./NormAssistantIcon";
 import type { AssessmentStatus, Disagreement } from "./AssessmentModal";
 

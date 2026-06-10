@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, Download, FileClock, GitCompare } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui";
 import { cn } from "@/lib/utils";
 import { InModalDrawer } from "./InModalDrawer";
 

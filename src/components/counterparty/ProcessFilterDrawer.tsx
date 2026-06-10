@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 import { X } from "lucide-react";
 import { processMeta, processOrder } from "@/lib/process-meta";
 import type { ProcessStage } from "@/lib/mock-data";
