@@ -116,10 +116,10 @@ export function KeyAnomaliesWidget() {
                     >
                       {meta.label}
                     </span>
-                    <div className="mt-1 text-sm font-semibold leading-snug text-foreground">{a.title}</div>
+                    <div className="mt-1 text-[13px] font-medium leading-snug text-foreground">{a.title}</div>
                     <div
                       className={cn(
-                        "mt-0.5 text-xs leading-snug text-muted-foreground",
+                        "mt-0.5 text-xs leading-snug text-slate-600",
                         !isOpen && "line-clamp-1",
                       )}
                     >
