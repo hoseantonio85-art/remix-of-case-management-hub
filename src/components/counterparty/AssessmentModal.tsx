@@ -321,9 +321,19 @@ export function AssessmentModal({
                 Подробнее
               </button>
             </div>
-            <div className="mt-5 rounded-3xl bg-gradient-to-r from-rose-200 via-red-100 to-orange-100 p-[1.5px]">
-              <div className="flex items-start gap-4 rounded-[22px] bg-gradient-to-br from-rose-50/60 via-white to-white px-6 py-5">
-                <NormAssistantIcon size="lg" />
+            <div className={cn(
+              "mt-5 rounded-3xl p-[1.5px]",
+              positive
+                ? "bg-gradient-to-r from-emerald-200 via-emerald-100 to-teal-100"
+                : "bg-gradient-to-r from-rose-200 via-red-100 to-orange-100",
+            )}>
+              <div className={cn(
+                "flex items-start gap-4 rounded-[22px] px-6 py-5",
+                positive
+                  ? "bg-gradient-to-br from-emerald-50/60 via-white to-white"
+                  : "bg-gradient-to-br from-rose-50/60 via-white to-white",
+              )}>
+                <NormAssistantIcon size="lg" tone={positive ? "emerald" : "rose"} />
                 <div className="min-w-0 flex-1">
                   <div className="mt-1 text-lg font-semibold text-slate-900">
                     Обоснование оценки
@@ -334,7 +344,9 @@ export function AssessmentModal({
                     </div>
                   )}
                   <p className="mt-2 text-sm leading-snug text-muted-foreground">
-                    Компания имеет критически значимые риски: за последние 6 месяцев сменились собственники или директор, оперативное погашение краткосрочных обязательств невозможно, а также активы сформированы в основном за счёт привлечённых средств.
+                    {positive
+                      ? "Критически значимых факторов риска не выявлено. Финансовые, регистрационные и репутационные признаки не блокируют заключение сделки."
+                      : "Компания имеет критически значимые риски: за последние 6 месяцев сменились собственники или директор, оперативное погашение краткосрочных обязательств невозможно, а также активы сформированы в основном за счёт привлечённых средств."}
                   </p>
                 </div>
               </div>
