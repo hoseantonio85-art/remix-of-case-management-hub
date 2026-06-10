@@ -67,8 +67,8 @@ export function TrustFactorsWidget() {
               >
                 {f.tag}
               </span>
-              <div className="mt-1 text-sm font-semibold leading-snug text-foreground">{f.title}</div>
-              <div className="mt-0.5 line-clamp-1 text-xs leading-snug text-muted-foreground">{f.text}</div>
+              <div className="mt-1 text-[13px] font-medium leading-snug text-foreground">{f.title}</div>
+              <div className="mt-0.5 line-clamp-1 text-xs leading-snug text-slate-600">{f.text}</div>
             </div>
 
           </li>
