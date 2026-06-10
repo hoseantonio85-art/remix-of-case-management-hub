@@ -163,6 +163,7 @@ export function AssessmentModal({
           { text: "Изменилась налоговая задолженность", tone: "amber" },
           { text: "Добавлен новый судебный фактор", tone: "slate" },
         ]);
+        toast.success("Оценка обновлена");
       }, 1800),
       window.setTimeout(() => setHighlightedChanges(false), 5400),
     ];
