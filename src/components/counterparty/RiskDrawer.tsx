@@ -170,7 +170,7 @@ export function RiskDrawer({
                 rows={3}
                 placeholder="Опишите контекст принятого решения…"
                 value={comment}
-                onChange={(v) => setComment(v)}
+                onChange={(e) => setComment(e.target.value)}
               />
             </div>
           </div>
