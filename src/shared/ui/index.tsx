@@ -63,7 +63,7 @@ export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export { Skeleton as Loader } from "@/components/ui/skeleton";
 export { Skeleton } from "@/components/ui/skeleton";
 export { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-export { Toaster as Sonner } from "@/components/ui/sonner";
+export { Toaster as Sonner, Toaster } from "@/components/ui/sonner";
 
 // --- статические helpers с прокси к ALL_COMPONENTS.md API ---
 import * as React from "react";
