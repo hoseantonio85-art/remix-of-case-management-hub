@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, ArrowLeft, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
+import { toast } from "sonner";
 import { NormAssistantIcon } from "./NormAssistantIcon";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -103,7 +104,7 @@ export function AssessmentModal({
   onCloseFlow?: () => void;
   positive?: boolean;
 }) {
-  const [notice, setNotice] = useState<{ tone: "success" | "info"; text: string } | null>(null);
+  
   const [groupDrawer, setGroupDrawer] = useState<AssessmentGroup | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
 
@@ -162,6 +163,7 @@ export function AssessmentModal({
           { text: "Изменилась налоговая задолженность", tone: "amber" },
           { text: "Добавлен новый судебный фактор", tone: "slate" },
         ]);
+        toast.success("Оценка обновлена");
       }, 1800),
       window.setTimeout(() => setHighlightedChanges(false), 5400),
     ];
@@ -220,7 +222,7 @@ export function AssessmentModal({
     });
     setDisagreeSubmitted(true);
     setDisagreeMode(false);
-    setNotice({ tone: "info", text: "Замечания отправлены на пересмотр" });
+    toast("Замечания отправлены на пересмотр");
   };
 
 
@@ -260,7 +262,7 @@ export function AssessmentModal({
 
 
   const handleDownload = () => {
-    setNotice({ tone: "info", text: "Отчёт по оценке скачан" });
+    toast.success("Отчёт скачан");
   };
 
 
@@ -300,11 +302,6 @@ export function AssessmentModal({
               <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${resolutionBadge.chip}`}>
                 {resolutionBadge.label}
               </span>
-              {statusBadge && (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${statusBadge.chip}`}>
-                  {statusBadge.label}
-                </span>
-              )}
             </div>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
               Оценка контрагента
@@ -356,30 +353,6 @@ export function AssessmentModal({
 
           {/* Body */}
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-white px-5 py-6 lg:px-10">
-            {notice && (
-              <div
-                className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm ${
-                  notice.tone === "success"
-                    ? "border-emerald-200 bg-emerald-50/70 text-emerald-900"
-                    : "border-border bg-slate-50 text-foreground"
-                }`}
-                role="status"
-              >
-                {notice.tone === "success" ? (
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                ) : (
-                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
-                <div className="flex-1 leading-snug">{notice.text}</div>
-                <button
-                  onClick={() => setNotice(null)}
-                  className="shrink-0 rounded p-0.5 text-muted-foreground transition hover:bg-black/5"
-                  aria-label="Закрыть"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
 
             <div className="grid gap-y-5 gap-x-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-12">
               {/* What changed — right column */}
