@@ -109,6 +109,7 @@ export function AssessmentModal({
   
   const [groupDrawer, setGroupDrawer] = useState<AssessmentGroup | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Disagreement (review) inline flow — checkboxes appear directly on group cards.
   const [disagreeMode, setDisagreeMode] = useState(false);
