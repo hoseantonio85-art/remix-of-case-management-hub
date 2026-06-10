@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, Sparkles, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
+import { X, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
+import { NormAssistantIcon } from "./NormAssistantIcon";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -278,11 +279,9 @@ export function AssessmentModal({
                 Подробнее
               </button>
             </div>
-            <div className="mt-5 rounded-3xl bg-gradient-to-r from-blue-100 via-violet-100 to-emerald-100 p-[1.5px]">
-              <div className="flex items-start gap-4 rounded-[22px] bg-white px-6 py-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-600">
-                  <Sparkles className="h-6 w-6" />
-                </div>
+            <div className="mt-5 rounded-3xl bg-gradient-to-r from-rose-200 via-red-100 to-orange-100 p-[1.5px]">
+              <div className="flex items-start gap-4 rounded-[22px] bg-gradient-to-br from-rose-50/60 via-white to-white px-6 py-5">
+                <NormAssistantIcon size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="mt-1 text-lg font-semibold text-slate-900">
                     Обоснование оценки
