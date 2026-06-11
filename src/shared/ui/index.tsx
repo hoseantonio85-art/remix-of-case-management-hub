@@ -634,6 +634,14 @@ export interface SelectProps {
   testId?: string;
   className?: string;
   iconClassName?: string;
+  disabled?: boolean;
+  error?: boolean;
+  helperText?: React.ReactNode;
+  required?: boolean;
+  placeholder?: string;
+  onListSubmit?: (value: unknown) => void;
+  showValueTooltip?: boolean;
+  treeProps?: unknown;
 }
 function optKey(o: SelectOption) {
   return (o.id ?? o.key ?? o.value ?? o.label ?? o.title ?? "") as string;
