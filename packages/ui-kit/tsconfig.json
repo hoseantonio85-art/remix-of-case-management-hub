@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"esModuleInterop": true,
+		"jsx": "react-jsx",
+		"allowJs": true,
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["./src/**/*"],
+	"exclude": ["dist", "build", "node_modules", "utils", "./tsup.config.ts"],
+	"extends": "@sber-orm/tsconfig-config/tsconfig.base.json"
+}
