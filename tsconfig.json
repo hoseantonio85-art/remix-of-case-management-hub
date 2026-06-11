@@ -32,10 +32,10 @@
         "./src/*"
       ],
       "@sber-orm/ui-kit": [
-        "./packages/ui-kit/src/index.ts"
+        "./packages/ui-kit/dist/index.d.ts"
       ],
       "@sber-orm/ui-kit/*": [
-        "./packages/ui-kit/src/*"
+        "./packages/ui-kit/dist/*"
       ]
     }
   }
