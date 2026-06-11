@@ -1,3 +1,7 @@
+// migration-note: This meta module stores LucideIcon components as values
+// used by product widgets. After @sber-orm/ui-kit migration, replace with IconName
+// strings rendered via the Icon adapter from @/shared/ui.
+
 import {
   TrendingDown,
   Scale,

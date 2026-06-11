@@ -45,6 +45,15 @@
 > Обновлено: `Radio` добавлен как partial-compatible адаптер в `src/shared/ui`.
 > `Notice` / `Notification` экспортируются как alias `Alert` (помечены TODO).
 > `Loader` всё ещё мапится на `Skeleton`, спиннер ждёт ui-kit.
+
+## Domain cleanup status
+
+- Все продуктовые компоненты в `src/components/counterparty/*` получили header-комментарии
+  (`product-component-candidate` или `legacy-adapter + product-component-candidate`).
+- Meta-модули (`process-meta`, `problem-indicators`, `risk-meta`, `assessment-count-meta`)
+  помечены — хранят `LucideIcon` как значения, после миграции переводятся на `IconName`.
+- Icon-замена применена там, где безопасно (InModalDrawer, ProcessFilterDrawer — close X).
+- Сложные карточки и AI-виджеты не трогаются — это `product-component-candidate`.
 - **product-kit candidates**: `CounterpartyStatusBadge`, `RiskCard`, `AssistantSummaryCard`, `EvidenceList`, `SourceQuote`, `DebtStepper`, `KeyAnomaliesWidget`, `TrustFactorsWidget`, `ResolutionCard`, `NormAssistantIcon`.
 
 ## Components that can stay as local composition

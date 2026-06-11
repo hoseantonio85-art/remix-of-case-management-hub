@@ -1,3 +1,7 @@
+// product-component-candidate
+// migration-note: This is a product pattern composed from shared/ui primitives.
+// Not expected to be exported from @sber-orm/ui-kit; candidate for product-kit.
+
 import { Info } from "lucide-react";
 
 type Tone = "emerald" | "green" | "slate";

@@ -1,3 +1,6 @@
+// legacy-adapter
+// migration-note: Uses Dialog (shadcn) from @/shared/ui. Replace with Modal
+// after @sber-orm/ui-kit migration. Direct lucide-react imports also remain here.
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -930,4 +933,3 @@ export default function Index() {
     </div>
   );
 }
-

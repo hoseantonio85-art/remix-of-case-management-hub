@@ -96,6 +96,56 @@
 | Checkbox / Switch / Textarea / Tooltip / Badge / RadioGroup / Alert | legacy-adapter | legacy-adapter | API не приведено к контракту (требует адаптеров) | medium |
 | Dialog / Sheet exports | legacy-adapter | legacy-adapter | помечены `migration-note` | medium |
 
+## Domain cleanup result
+
+| File | What was changed | Remaining legacy/prototype-only | Risk |
+|---|---|---|---|
+| `src/components/counterparty/InModalDrawer.tsx` | `lucide X` → `Icon name="close"`; добавлен `product-component-candidate` header | — | low |
+| `src/components/counterparty/ProcessFilterDrawer.tsx` | `lucide X` → `UiIcon name="close"`; `legacy-adapter` header (Sheet) | использует `Sheet*` | medium |
+| `src/pages/Index.tsx` | `legacy-adapter` header | прямые `lucide-react` иконки, `Dialog/DialogContent` | high |
+| `src/components/counterparty/CounterpartyModal.tsx` | `legacy-adapter + product-component-candidate` header | `Dialog/DialogContent` + прямые иконки | high |
+| `src/components/counterparty/AssessmentModal.tsx` | `legacy-adapter + product-component-candidate` header | прямые иконки, `Dialog`-вёрстка | high |
+| `src/components/counterparty/{Assistant,Assessment,Contract,Debt,Trust,KeyAnomalies,Resolution,Risk,Registration,NormAssistant,DebtStepper,DebtProcess,DebtSummary}*.tsx` | `product-component-candidate` header | прямые `lucide-react` (см. ниже) | medium |
+| `src/lib/{process-meta,problem-indicators}.ts`, `src/components/counterparty/{risk-meta,assessment-count-meta}.ts` | migration-note header | хранят `LucideIcon` как значения | medium |
+
+## Product component candidates
+
+| Component | Why it exists | Built from shared/ui | Should move to product-kit? |
+|---|---|---|---|
+| InModalDrawer | Drawer внутри модалки (UX-паттерн) | частично (Icon) | Да |
+| AssistantSummaryCard | AI-summary блок | частично (Button) | Да |
+| ResolutionCard | Карточка резолюции | частично (Button) | Да |
+| DebtSummaryCard / DebtProcessDrawer / DebtStepper | Доменный stepper исков | частично | Да |
+| KeyAnomaliesWidget / TrustFactorsWidget | Виджеты доверия и аномалий | частично | Да |
+| RegistrationInfoWidget / RegistrationInfoDrawer | Реквизиты контрагента | частично | Да |
+| RiskDrawer | Risk-форма | через `Input/Textarea/Button/Checkbox` | Да |
+| ContractDrawer | Контракт-форма | через `Input/Textarea/Button` | Да |
+| AssessmentModal / AssessmentHistoryDrawer | Оценка контрагента + история | частично | Да |
+| NormAssistantIcon | Брендовая иконка ассистента | использует `lucide Sparkles` напрямую | Да |
+| CounterpartyModal | Главная модалка контрагента | использует `Dialog*` | Да |
+| CounterpartyStatusBadge | Брендированный статус | нет ui-kit `Badge`-обёртки | Да |
+
+## Remaining direct HTML primitives
+
+| File | Element | Reason | Migration decision |
+|---|---|---|---|
+| `InModalDrawer.tsx` | `<button>` для close | Нужен absolute-позиционированный close в InModal-drawer | Оставить product (или вынести в product `Drawer`) |
+| `ProcessFilterDrawer.tsx` | `<button>` для close и для опций списка | UX-фильтр | Заменить опции на `RadioChips`, close — через product `Drawer.header` |
+| `RiskDrawer.tsx`, `ContractDrawer.tsx` | формы из `<div>/<label>` | Layout-обёртки | Не трогать |
+| Доменные карточки (DebtSummaryCard и др.) | `<div>` структуры | Layout | Не трогать |
+| `<input type="radio">` в `Radio` (shared/ui) | radio | Минимальная реализация | После ui-kit заменить на ui-kit `Radio` |
+
+## Remaining legacy adapters
+
+| Adapter | Used in | Why still needed | Migration decision |
+|---|---|---|---|
+| `Dialog*` (shadcn) | `Index.tsx`, `CounterpartyModal.tsx`, `AssessmentModal.tsx` | Большие модалки с фиксированной вёрсткой `largeModalContentClass` | Поэтапно мигрировать на `Modal` |
+| `Sheet*` | `ProcessFilterDrawer.tsx` (и косвенно `InModalDrawer.tsx` — нет) | Drawer для фильтра | Заменить на product `Drawer` |
+| `Checkbox/Textarea/Switch/Tooltip/Badge/Alert/RadioGroup/Label` | домен через `@/shared/ui` re-export | Сохраняют shadcn-API | Завернуть в адаптеры с value-first onChange |
+| `LegacySelect/SelectTrigger/...` | не используется напрямую в домене | Backward compat | Удалить после миграции |
+| `Loader` = `Skeleton` | пока не используется | Ожидает spinner из ui-kit | Заменить |
+| `Notice`/`Notification` = `Alert` | пока не используется | Ожидает выделенных компонентов | Заменить |
+
 ## No-ui-kit analogs
 
 | Pattern | Used in | Why needed | Temporary solution | Migration decision |

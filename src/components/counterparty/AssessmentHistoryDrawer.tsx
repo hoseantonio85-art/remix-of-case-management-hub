@@ -1,3 +1,7 @@
+// product-component-candidate
+// migration-note: This is a product pattern composed from shared/ui primitives.
+// Not expected to be exported from @sber-orm/ui-kit; candidate for product-kit.
+
 import { useState } from "react";
 import { ChevronDown, Download, FileClock, GitCompare } from "lucide-react";
 import { toast } from "sonner";

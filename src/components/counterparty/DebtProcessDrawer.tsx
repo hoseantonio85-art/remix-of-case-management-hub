@@ -1,3 +1,7 @@
+// product-component-candidate
+// migration-note: This is a product pattern composed from shared/ui primitives.
+// Not expected to be exported from @sber-orm/ui-kit; candidate for product-kit.
+
 import { useMemo, useState } from "react";
 import { ArrowRight, ArrowLeft, AlertTriangle, Check, Paperclip, FileText, Clock, History as HistoryIcon } from "lucide-react";
 import type { CollectionSubStep } from "@/lib/mock-data";

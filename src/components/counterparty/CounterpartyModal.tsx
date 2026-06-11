@@ -1,3 +1,7 @@
+// legacy-adapter + product-component-candidate
+// migration-note: Uses Dialog (shadcn) which is not part of ALL_COMPONENTS.md.
+// Internal layout is a product pattern; needs manual migration to Modal + product Drawer.
+
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent } from "@/shared/ui";
 import { cn } from "@/lib/utils";
