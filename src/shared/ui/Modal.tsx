@@ -12,19 +12,30 @@ import { cn } from "@/lib/utils";
 
 /**
  * Адаптер Modal под контракт @sber-orm/ui-kit.
- * Внутри использует shadcn Dialog. Дополнительно ре-экспортирует Dialog*
- * для совместимости с существующими крупными модалками (CounterpartyModal,
- * AssessmentModal), где используется фиксированная вёрстка через
- * largeModalContentClass.
+ * Внутри использует shadcn Dialog. Контракт API:
+ *   Modal:        open / onClose / onOpenChange / children
+ *   ModalHeader:  title / closeButtonProps / children
+ *   ModalBody:    children
+ *   ModalFooter:  noBorder / children
+ *
+ * Закрытие по overlay и Escape — стандартное поведение shadcn Dialog
+ * (onOpenChange(false) → onClose()).
  */
 export interface ModalProps {
   open?: boolean;
+  onClose?: () => void;
   onOpenChange?: (open: boolean) => void;
   children?: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ open, onOpenChange, children }) => (
-  <Dialog open={open} onOpenChange={onOpenChange}>
+export const Modal: React.FC<ModalProps> = ({ open, onClose, onOpenChange, children }) => (
+  <Dialog
+    open={open}
+    onOpenChange={(o) => {
+      onOpenChange?.(o);
+      if (!o) onClose?.();
+    }}
+  >
     {children}
   </Dialog>
 );
@@ -37,14 +48,48 @@ export const ModalBody = React.forwardRef<
 ));
 ModalBody.displayName = "ModalBody";
 
-export const ModalHeader = DialogHeader;
-export const ModalFooter = DialogFooter;
+export interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  title?: React.ReactNode;
+  /** TODO: partial-compatible with @sber-orm/ui-kit
+   *  migration-note: closeButtonProps received but pass-through only; close button
+   *  itself is rendered by shadcn DialogContent. */
+  closeButtonProps?: React.HTMLAttributes<HTMLButtonElement>;
+}
+export const ModalHeader: React.FC<ModalHeaderProps> = ({
+  title,
+  closeButtonProps: _closeButtonProps,
+  children,
+  className,
+  ...rest
+}) => (
+  <DialogHeader className={className} {...rest}>
+    {title ? <DialogTitle>{title}</DialogTitle> : null}
+    {children}
+  </DialogHeader>
+);
+
+export interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  noBorder?: boolean;
+}
+export const ModalFooter: React.FC<ModalFooterProps> = ({
+  noBorder,
+  className,
+  ...rest
+}) => (
+  <DialogFooter
+    className={cn(!noBorder && "border-t pt-3", className)}
+    {...rest}
+  />
+);
+
 export const ModalTitle = DialogTitle;
 export const ModalDescription = DialogDescription;
 export const ModalTrigger = DialogTrigger;
 
-// Совместимость: пока CounterpartyModal/AssessmentModal используют Dialog напрямую,
-// re-export базовых dialog-примитивов остаётся, чтобы не ломать существующую вёрстку.
+// legacy-adapter
+// migration-note: Dialog is not part of ALL_COMPONENTS.md. Prefer Modal.
+// Re-exported, чтобы не ломать CounterpartyModal/AssessmentModal/Index, где
+// используется фиксированная вёрстка через largeModalContentClass.
 export {
   Dialog,
   DialogContent,
