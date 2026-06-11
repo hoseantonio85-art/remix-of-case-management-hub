@@ -61,7 +61,7 @@ export function ProcessFilterDrawer({
             className="rounded p-1 text-muted-foreground hover:bg-muted"
             aria-label="Закрыть"
           >
-            <UiIcon name="close" size="md" />
+            <UiIcon name="cross" width={20} height={20} />
           </button>
         </div>
 

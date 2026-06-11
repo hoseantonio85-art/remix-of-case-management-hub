@@ -50,7 +50,7 @@ export function InModalDrawer({
           className="absolute right-4 top-4 z-10 rounded-full bg-white/80 p-1.5 text-muted-foreground backdrop-blur transition hover:bg-white"
           aria-label="Закрыть"
         >
-          <Icon name="close" size="md" />
+          <Icon name="cross" width={20} height={20} />
         </button>
         {children}
       </div>
