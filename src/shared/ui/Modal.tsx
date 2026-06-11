@@ -48,7 +48,7 @@ export const ModalBody = React.forwardRef<
 ));
 ModalBody.displayName = "ModalBody";
 
-export interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ModalHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
   /** TODO: partial-compatible with @sber-orm/ui-kit
    *  migration-note: closeButtonProps received but pass-through only; close button
