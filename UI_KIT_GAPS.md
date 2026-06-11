@@ -41,6 +41,10 @@
 ## Components that should be added to ui-kit or product-kit
 
 - **ui-kit candidates**: `Drawer` (полноразмерный и in-modal), `Radio` (single), `Notice`, `Notification`, `Loader` (spinner), `Tag` (как лёгкая альтернатива `Chips`), `Avatar` (если появится), `Stepper`.
+
+> Обновлено: `Radio` добавлен как partial-compatible адаптер в `src/shared/ui`.
+> `Notice` / `Notification` экспортируются как alias `Alert` (помечены TODO).
+> `Loader` всё ещё мапится на `Skeleton`, спиннер ждёт ui-kit.
 - **product-kit candidates**: `CounterpartyStatusBadge`, `RiskCard`, `AssistantSummaryCard`, `EvidenceList`, `SourceQuote`, `DebtStepper`, `KeyAnomaliesWidget`, `TrustFactorsWidget`, `ResolutionCard`, `NormAssistantIcon`.
 
 ## Components that can stay as local composition

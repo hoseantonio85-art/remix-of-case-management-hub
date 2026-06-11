@@ -17,14 +17,16 @@
 
 - [x] Button API matches `ALL_COMPONENTS.md`
 - [x] Input API matches `ALL_COMPONENTS.md`
-- [ ] Select API matches `ALL_COMPONENTS.md` — отсутствует `tree`, `multiple`, `useChips`, `showOptionSearch`, `showDroplistButtons`.
-- [ ] Modal API matches `ALL_COMPONENTS.md` — нет `size`, `scrollable`, `closeOnOverlayClick`.
+- [~] Select API matches `ALL_COMPONENTS.md` — `multiple`, `useChips`, `onChipRemove` реализованы базово; `tree`, `showOptionSearch`, `showDroplistButtons` — TODO.
+- [~] Modal API matches `ALL_COMPONENTS.md` — `onClose`, `ModalHeader.title`, `closeButtonProps`, `ModalFooter.noBorder` реализованы; `size`, `scrollable` — TODO.
 - [x] Text API matches `ALL_COMPONENTS.md`
 - [x] Title API matches `ALL_COMPONENTS.md`
 - [x] Icon API matches `ALL_COMPONENTS.md` (расширять `icon-registry` по мере появления имён)
 - [ ] Badge API matches `ALL_COMPONENTS.md` — passthrough shadcn (`variant`), нет `color/size/variant fill|outline`.
 - [x] Chips API matches `ALL_COMPONENTS.md`
 - [x] RadioChips / CheckboxChips API matches `ALL_COMPONENTS.md`
+- [~] Radio (single) добавлен как partial-compatible adapter.
+- [~] Notice / Notification экспортированы как alias `Alert` (TODO).
 
 ## Exceptions
 

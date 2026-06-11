@@ -26,15 +26,26 @@ export interface InputProps
   noBorder?: boolean;
   tooltip?: React.ReactNode;
   icon?: IconName;
+  /** alias of readOnly to match ALL_COMPONENTS.md */
+  readonly?: boolean;
+  /** TODO: partial-compatible with @sber-orm/ui-kit
+   *  migration-note: isComplexPart visual treatment is not implemented. */
+  isComplexPart?: boolean;
+  /** TODO: partial-compatible — grayPrefix slot not rendered. */
+  grayPrefix?: boolean;
+  required?: boolean;
   onChange?: (value: string, event: React.ChangeEvent<HTMLInputElement>, reason?: string) => void;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, helperText, error, size = "M", viewOnly, labelInside, noBorder, tooltip, icon, className, readOnly, onChange, placeholder, ...rest },
+    { label, helperText, error, size = "M", viewOnly, labelInside, noBorder, tooltip, icon, className,
+      readOnly, readonly, isComplexPart: _isComplexPart, grayPrefix: _grayPrefix, required,
+      onChange, placeholder, ...rest },
     ref,
   ) => {
     const isErr = Boolean(error);
+    const isReadOnly = readOnly || readonly;
     const IconCmp = icon ? resolveIcon(icon) : null;
     if (viewOnly) {
       return (
@@ -47,7 +58,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
     return (
       <label className={cn("block", className)}>
-        {label && !labelInside && <div className="mb-1 text-xs text-muted-foreground">{label}</div>}
+        {label && !labelInside && (
+          <div className="mb-1 text-xs text-muted-foreground">
+            {label}{required && <span className="text-destructive"> *</span>}
+          </div>
+        )}
         <div className="relative">
           {IconCmp && (
             <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -56,7 +71,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           <ShadcnInput
             ref={ref}
-            readOnly={readOnly}
+            readOnly={isReadOnly}
             placeholder={labelInside && typeof label === "string" ? label : placeholder}
             aria-invalid={isErr || undefined}
             onChange={(e) => onChange?.(e.target.value, e)}
