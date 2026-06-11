@@ -8,6 +8,12 @@ import { Toaster } from "@/shared/ui";
 
 const queryClient = new QueryClient();
 
+// LOVABLE_KEEP_START
+// Не изменять этот блок: специфическая настройка basename для GitHub Pages
+const isGitHubPages = window.location.hostname.includes("github.io");
+const basename = isGitHubPages ? "/remix-of-case-management-hub/" : "";
+// LOVABLE_KEEP_END
+
 // Базовый путь для GitHub Pages (совпадает с `base` в vite.config.ts)
 const basename = import.meta.env.BASE_URL;
 
