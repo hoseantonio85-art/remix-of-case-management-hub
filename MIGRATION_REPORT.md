@@ -3,6 +3,8 @@
 ## Summary
 
 - Готовность к прямой подмене `export * from "@sber-orm/ui-kit"`: **~55–60%**.
+
+> Обновлено после strict shared/ui iteration: **~65–70%**.
 - Сделано хорошо:
   - Существует единая точка входа `src/shared/ui` — почти все домены импортируют UI через неё.
   - `Button`, `Input`, `Text`, `Title`, `Link`, `Icon`, `Row`, `Col`, `Chips`, `RadioChips`, `CheckboxChips` приведены к контракту `ALL_COMPONENTS.md`.
@@ -73,6 +75,26 @@
 | Drawer | missing | — | В ui-kit есть Drawer, в shared/ui нет адаптера | Добавить адаптер на базе `@/components/ui/drawer` или `sheet` |
 | Radio (single) | missing | — | — | Добавить |
 | Notice / Notification | missing | — | — | Добавить (сейчас только Alert) |
+
+## Strict shared/ui iteration result
+
+| Component | Status before | Status after | Remaining gap | Risk |
+|---|---|---|---|---|
+| Button | strict-compatible | strict-compatible | — | low (loading-спиннер добавлен, ellipse/function/ai визуально различимы) |
+| Input | strict-compatible | strict-compatible | `isComplexPart`, `grayPrefix` приняты типом, без визуала | low |
+| Text | strict-compatible | strict-compatible | — | low |
+| Title | strict-compatible | strict-compatible | — | low |
+| Link | strict-compatible | strict-compatible | — | low |
+| Icon | strict-compatible | strict-compatible | реестр расширен (alertTriangle, sparkles, loader, refresh, file, history, …) | low |
+| Row / Col | strict-compatible | strict-compatible | — | low |
+| Chips / RadioChips / CheckboxChips | strict-compatible | strict-compatible | — | low |
+| Modal | partial-compatible | partial-compatible | `size`, `scrollable`, `closeOnOverlayClick` не добавлены; ModalHeader.title + closeButtonProps + ModalFooter.noBorder реализованы; `onClose` поддержан | medium |
+| Select | partial-compatible | partial-compatible | `tree`, `showOptionSearch`, `showDroplistButtons`, `useCustomSearch`, `optionRenderLimit` — TODO; `multiple` и `useChips`+`onChipRemove` — базовая реализация | medium |
+| Radio | missing | partial-compatible | визуально нативный, без брендовых стилей | low |
+| Notice / Notification | missing | legacy-adapter | мапятся на `Alert` (re-export) | low |
+| Loader | legacy-adapter | legacy-adapter | пока `Skeleton`, не спиннер | low |
+| Checkbox / Switch / Textarea / Tooltip / Badge / RadioGroup / Alert | legacy-adapter | legacy-adapter | API не приведено к контракту (требует адаптеров) | medium |
+| Dialog / Sheet exports | legacy-adapter | legacy-adapter | помечены `migration-note` | medium |
 
 ## No-ui-kit analogs
 
