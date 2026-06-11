@@ -2,6 +2,11 @@
  * Единая точка входа UI. Импорт UI в продуктовом коде — ТОЛЬКО отсюда.
  * Контракт API строго соответствует @sber-orm/ui-kit (см. ALL_COMPONENTS.md).
  * Внутри пока — локальные адаптеры поверх shadcn/radix/lucide.
+ *
+ * После подключения внутреннего registry и установки @sber-orm/ui-kit
+ * локальные адаптеры можно будет постепенно заменить на:
+ *   export * from "@sber-orm/ui-kit";
+ * (см. также `./sber-switch.ts`).
  */
 
 // import * as SberUiKit from "@sber-orm/ui-kit"; // включить после установки пакета
@@ -23,6 +28,9 @@ export {
   ModalTitle,
   ModalDescription,
   ModalTrigger,
+  type ModalProps,
+  type ModalHeaderProps,
+  type ModalFooterProps,
   // legacy: TODO мигрировать на Modal
   Dialog,
   DialogContent,
@@ -36,6 +44,8 @@ export {
 // Passthrough с совместимым API (минимальные правки на стороне продукта)
 export { Checkbox } from "@/components/ui/checkbox";
 export { Textarea } from "@/components/ui/textarea";
+// legacy-adapter
+// migration-note: Sheet/Drawer is not part of ALL_COMPONENTS.md. Requires product decision.
 export {
   // legacy: TODO мигрировать Sheet → Drawer/Modal из ui-kit
   Sheet,
@@ -52,13 +62,18 @@ export { Switch } from "@/components/ui/switch";
 export { Label } from "@/components/ui/label";
 export { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// Loader — TODO: partial-compatible. В ui-kit это спиннер, временно — Skeleton.
 export { Skeleton as Loader } from "@/components/ui/skeleton";
 export { Skeleton } from "@/components/ui/skeleton";
 export { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// Notice/Notification — TODO: partial-compatible. Маппим на Alert до появления ui-kit.
+// migration-note: ui-kit предоставит выделенные компоненты.
+export { Alert as Notice, Alert as Notification } from "@/components/ui/alert";
 export { Toaster as Sonner, Toaster } from "@/components/ui/sonner";
 
-// legacy: radix-композиция Select* — НЕ использовать в новом коде.
-// TODO(@sber-orm/ui-kit): новый код — только адаптер `Select` ниже.
+// legacy-adapter
+// migration-note: Radix-style Select composition is not compatible with ALL_COMPONENTS.md.
+// Prefer unified Select with options/value/onChange.
 export {
   Select as LegacySelect,
   SelectContent,
