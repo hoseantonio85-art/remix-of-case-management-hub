@@ -650,26 +650,64 @@ export const Select: React.FC<SelectProps> = ({
   placeholder,
   readonly,
   multiple,
+  useChips,
+  onChipRemove,
+  disabled,
+  error,
+  helperText,
   className,
   testId,
   emptyOptionsText = "Нет вариантов",
 }) => {
-  // multiple/tree/chips — пока не реализованы здесь; маркируем TODO
-  // TODO(@sber-orm/ui-kit): multiple/tree/useChips/showOptionSearch/showDroplistButtons.
-  const current = Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  // TODO: partial-compatible with @sber-orm/ui-kit
+  // migration-note: tree / showOptionSearch / showDroplistButtons / useCustomSearch
+  // ещё не реализованы — типы приняты, ждём пакет.
+  const locked = readonly || disabled;
+  const arr = Array.isArray(value) ? value : value != null ? [value] : [];
+  const current = arr[0] ?? "";
+  const handleSelect = (v: string) => {
+    if (multiple) {
+      const next = arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+      const fulls = options.filter((o) => next.includes(optKey(o)));
+      onChange?.(next, null, fulls, "selectOption");
+    } else {
+      const full = options.find((o) => optKey(o) === v);
+      onChange?.(v, null, full, "selectOption");
+    }
+  };
+  const removeChip = (v: string) => {
+    onChipRemove?.(v);
+    const next = arr.filter((x) => x !== v);
+    const fulls = options.filter((o) => next.includes(optKey(o)));
+    onChange?.(next, null, fulls, "clear");
+  };
   return (
     <div className={className} data-testid={testId}>
       {label && !labelInside && (
         <div className="mb-1 text-xs text-muted-foreground">{label}</div>
       )}
+      {useChips && arr.length > 0 && (
+        <div className="mb-1 flex flex-wrap gap-1">
+          {arr.map((v) => {
+            const o = options.find((x) => optKey(x) === v);
+            return (
+              <span key={v} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs">
+                {o ? optLabel(o) : v}
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => removeChip(v)}
+                  aria-label="Удалить"
+                >×</button>
+              </span>
+            );
+          })}
+        </div>
+      )}
       <RxSelect
         value={current}
-        onValueChange={(v) => {
-          const full = options.find((o) => optKey(o) === v);
-          const next = multiple ? [v] : v;
-          onChange?.(next, null, full, "selectOption");
-        }}
-        disabled={readonly}
+        onValueChange={handleSelect}
+        disabled={locked}
       >
         <RxTrigger>
           <RxValue placeholder={placeholder ?? (labelInside ? label : undefined)} />
@@ -681,11 +719,71 @@ export const Select: React.FC<SelectProps> = ({
             options.map((o) => (
               <RxItem key={optKey(o)} value={optKey(o)}>
                 {optLabel(o)}
+                {multiple && arr.includes(optKey(o)) ? " ✓" : ""}
               </RxItem>
             ))
           )}
         </RxContent>
       </RxSelect>
+      {helperText && (
+        <div className={cn("mt-1 text-xs", error ? "text-destructive" : "text-muted-foreground")}>
+          {helperText}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// Radio — минимальный single-выбор адаптер (ALL_COMPONENTS.md).
+// Для legacy совместимости RadioGroup/RadioGroupItem из radix остаются
+// в re-exports выше.
+// ============================================================================
+export interface RadioItem {
+  id: string;
+  title: React.ReactNode;
+  disabled?: boolean;
+}
+export interface RadioProps {
+  items: RadioItem[];
+  value?: string;
+  onChange?: (id: string, event: React.SyntheticEvent) => void;
+  name?: string;
+  label?: string;
+  helperText?: string;
+  error?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+  inline?: boolean;
+  testId?: string;
+}
+export const Radio: React.FC<RadioProps> = ({
+  items, value, onChange, name, label, helperText, error, readonly, disabled, inline, testId,
+}) => {
+  const locked = readonly || disabled;
+  return (
+    <div data-testid={testId}>
+      {label && <div className="mb-1 text-xs text-muted-foreground">{label}</div>}
+      <div className={cn("flex gap-3", inline ? "flex-row" : "flex-col")}>
+        {items.map((it) => (
+          <label key={it.id} className={cn("inline-flex items-center gap-2 text-sm", (locked || it.disabled) && "opacity-50")}>
+            <input
+              type="radio"
+              name={name}
+              value={it.id}
+              checked={value === it.id}
+              disabled={locked || it.disabled}
+              onChange={(e) => onChange?.(it.id, e)}
+            />
+            <span>{it.title}</span>
+          </label>
+        ))}
+      </div>
+      {helperText && (
+        <div className={cn("mt-1 text-xs", error ? "text-destructive" : "text-muted-foreground")}>
+          {helperText}
+        </div>
+      )}
     </div>
   );
 };
