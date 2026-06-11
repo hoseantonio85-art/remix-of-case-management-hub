@@ -11,9 +11,17 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), tsconfigPaths()],
   resolve: {
     alias: {
-      // Локальный alias на ui-kit, который в проде будет внешним npm-пакетом.
-      // Указываем на src, т.к. dist в репозитории не собран.
-      "@sber-orm/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
+      // Локальный alias на ui-kit (prebuilt npm-tarball 0.283.0).
+      // В проде будет ставиться как обычный npm-пакет.
+      // Порядок важен: более специфичный subpath — раньше.
+      "@sber-orm/ui-kit/index.css": path.resolve(
+        __dirname,
+        "./packages/ui-kit/dist/index.css",
+      ),
+      "@sber-orm/ui-kit": path.resolve(
+        __dirname,
+        "./packages/ui-kit/dist/index.js",
+      ),
     },
   },
   server: {
