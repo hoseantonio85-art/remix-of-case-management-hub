@@ -2,6 +2,7 @@ import * as React from "react";
 import { Button as ShadcnButton, type ButtonProps as ShadcnButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { resolveIcon, type IconName } from "./icon-registry";
+import { Loader2 } from "lucide-react";
 
 /**
  * Адаптер кнопки под контракт @sber-orm/ui-kit (см. ALL_COMPONENTS.md → Button).
@@ -70,6 +71,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const mappedSize: ShadcnButtonProps["size"] = iconOnly ? "icon" : sizeMap[size] ?? "default";
     const isWarning = variant === "warning";
     const isAi = variant === "ai";
+    const isEllipse = variant === "ellipse";
+    const isFunction = variant === "function";
     const IconLeft = icon ? resolveIcon(icon) : null;
     const IconRight = iconAfter ? resolveIcon(iconAfter) : null;
     return (
@@ -78,14 +81,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         variant={link ? "link" : mappedVariant}
         size={mappedSize}
         disabled={disabled || loading}
+        aria-busy={loading || undefined}
         className={cn(
           isWarning && "bg-amber-400 text-amber-950 hover:bg-amber-400/90",
           isAi && "bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white hover:opacity-95",
+          isEllipse && "rounded-full",
+          isFunction && "bg-transparent text-primary hover:bg-primary/10 hover:text-primary shadow-none",
+          loading && "relative",
           className,
         )}
         {...rest}
       >
-        {IconLeft ? <IconLeft className="h-4 w-4" /> : null}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : IconLeft ? <IconLeft className="h-4 w-4" /> : null}
         {!iconOnly && children}
         {IconRight ? <IconRight className="h-4 w-4" /> : null}
       </ShadcnButton>
