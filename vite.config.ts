@@ -5,9 +5,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "node:path";
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  // base используется как basename для BrowserRouter в src/App.tsx — для GitHub Pages
-  base: "/remix-of-case-management-hub/",
+export default defineConfig(({ command }) => ({
+  // В dev — корень "/", чтобы локально не было 404.
+  // В build — подпуть для GitHub Pages.
+  base: command === "build" ? "/remix-of-case-management-hub/" : "/",
   plugins: [react(), tailwindcss(), tsconfigPaths()],
   resolve: {
     alias: {
@@ -28,4 +29,4 @@ export default defineConfig({
     host: "::",
     port: 8080,
   },
-});
+}));
