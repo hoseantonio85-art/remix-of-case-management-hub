@@ -638,7 +638,6 @@ export interface SelectProps {
   error?: boolean;
   helperText?: React.ReactNode;
   required?: boolean;
-  placeholder?: string;
   onListSubmit?: (value: unknown) => void;
   showValueTooltip?: boolean;
   treeProps?: unknown;
