@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/shared/ui";
 import { Button } from "@/shared/ui";
-import { Icon } from "@/shared/ui";
+import { Icon as UiIcon } from "@/shared/ui";
 import { processMeta, processOrder } from "@/lib/process-meta";
 import type { ProcessStage } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export function ProcessFilterDrawer({
             className="rounded p-1 text-muted-foreground hover:bg-muted"
             aria-label="Закрыть"
           >
-            <X className="h-4 w-4" />
+            <UiIcon name="close" size="md" />
           </button>
         </div>
 
