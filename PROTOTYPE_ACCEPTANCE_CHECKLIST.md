@@ -7,9 +7,10 @@
   - OK в `src/components/counterparty/*` и `src/pages/Index.tsx` — прямых импортов нет.
   - Используются только внутри `src/shared/ui/*` (это допустимый слой совместимости).
 - [ ] No direct imports from `lucide-react` in domain components
-  - **Нарушают** ≈17 файлов в `src/components/counterparty/*`, `src/pages/Index.tsx`, `src/lib/{process-meta,problem-indicators}.ts`, `src/components/counterparty/{risk-meta,assessment-count-meta}.ts`.
+  - **Нарушают** ≈15 файлов — все помечены `migration-note` / `product-component-candidate`.
+  - Очищены: `InModalDrawer.tsx`, `ProcessFilterDrawer.tsx` (X → `Icon name="close"`).
 - [ ] No Radix/shadcn primitives in domain components
-  - **Нарушают**: `Dialog/DialogContent` в `Index.tsx`, `CounterpartyModal.tsx`; `Sheet/SheetContent` в `ProcessFilterDrawer.tsx` (через `@/shared/ui`-реэкспорт legacy).
+  - **Нарушают** (помечены `legacy-adapter`): `Dialog/DialogContent` в `Index.tsx`, `CounterpartyModal.tsx`, `AssessmentModal.tsx`; `Sheet/SheetContent` в `ProcessFilterDrawer.tsx`.
 - [x] No native `button`, `input`, `select`, `textarea` where ui-kit analog exists
   - В доменах не найдено.
 
@@ -31,6 +32,8 @@
 ## Exceptions
 
 - [ ] All `prototype-only` components are marked — частично (см. `UI_KIT_GAPS.md`); в коде ещё нет TSDoc-меток.
+  - [x] Все продуктовые карточки и drawer'ы в `src/components/counterparty/*` получили header `product-component-candidate`.
+  - [x] Все большие модалки (Counterparty/Assessment) и `Index.tsx` получили header `legacy-adapter`.
 - [x] All `no-ui-kit-analog` components have migration notes (см. `UI_KIT_GAPS.md`)
 - [x] All `legacy-adapter` components are listed in `MIGRATION_REPORT.md`
 - [x] All product component candidates are listed in `UI_KIT_GAPS.md`
