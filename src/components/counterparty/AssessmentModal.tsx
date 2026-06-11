@@ -1,3 +1,7 @@
+// legacy-adapter + product-component-candidate
+// migration-note: Uses Dialog (shadcn) which is not part of ALL_COMPONENTS.md.
+// Internal layout is a product pattern; needs manual migration to Modal + product Drawer.
+
 import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, ArrowLeft, CheckCircle2, Download, ChevronRight, Info, RefreshCw, Loader2, Flame, Zap, Send } from "lucide-react";
@@ -658,4 +662,3 @@ const changeIconClass: Record<
   slate: { bg: "bg-slate-100", text: "text-slate-600" },
   emerald: { bg: "bg-emerald-50", text: "text-emerald-600" },
 };
-

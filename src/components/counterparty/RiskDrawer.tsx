@@ -1,3 +1,7 @@
+// product-component-candidate
+// migration-note: This is a product pattern composed from shared/ui primitives.
+// Not expected to be exported from @sber-orm/ui-kit; candidate for product-kit.
+
 import { useEffect, useMemo, useState } from "react";
 import { Checkbox } from "@/shared/ui";
 import { Input } from "@/shared/ui";
