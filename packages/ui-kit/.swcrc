@@ -1,0 +1,10 @@
+{
+	"env": {
+		"coreJs": 3
+	},
+	"jsc": {
+		"parser": {
+			"syntax": "ecmascript"
+		}
+	}
+}

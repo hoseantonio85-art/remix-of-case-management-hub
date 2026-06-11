@@ -30,6 +30,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@sber-orm/ui-kit": [
+        "./packages/ui-kit/src/index.ts"
+      ],
+      "@sber-orm/ui-kit/*": [
+        "./packages/ui-kit/src/*"
       ]
     }
   }

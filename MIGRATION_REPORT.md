@@ -205,3 +205,60 @@
 6. Удалить из публичного API `Label`, `LegacySelect`, `Sheet*`, `Dialog*` после миграции экранов.
 7. Реализовать `Select` `multiple/useChips/tree` либо явно пометить как ожидание ui-kit.
 8. После — провести dry-run подмены: создать `src/shared/ui/index.ts` с `export * from "@sber-orm/ui-kit"` и собрать билд под флагом.
+
+## Local alias ui-kit migration result
+
+| Area | Result |
+|---|---|
+| Alias `@sber-orm/ui-kit` | configured (vite.config.ts → resolve.alias) |
+| Alias target | `packages/ui-kit/src` (исходники; dist в репозитории не собран) |
+| TypeScript paths | configured (`@sber-orm/ui-kit` → `./packages/ui-kit/src/index.ts`, `@sber-orm/ui-kit/*`) |
+| CSS import | required (kit подключает `./colors.scss` и `./variables.scss` через index.ts; в проекте нет sass) |
+| React duplicate check | risk — kit объявляет `react@18.3.1` как dependency, в приложении установлен react@19 |
+| Build | pass (npx tsc --noEmit). Реальный импорт из `@sber-orm/ui-kit` НЕ выполняется — иначе сборка падает (см. ниже) |
+
+### Почему `export * from "@sber-orm/ui-kit"` сейчас не включён
+
+- `packages/ui-kit/src/index.ts` тянет `./colors.scss`, `./variables.scss`, а каждый компонент — `*.module.scss`.
+- В проекте нет `sass` / `sass-embedded` — Vite не сможет обработать SCSS-модули.
+- Не установлены peer-зависимости kit: `classnames`, `simplebar-react`, `react-imask`, `react-i18next`, `@v-uik/hooks`, `@v-uik/utils` и вся группа `@v-uik/*`.
+- Возможен duplicate React (kit заявляет react@18, приложение на react@19).
+
+### staged migration layout (`src/shared/ui/`)
+
+| Файл | Назначение | Импортирует `@sber-orm/ui-kit`? |
+|---|---|---|
+| `index.tsx` | Единая публичная точка для продуктового кода | нет |
+| `sber.ts` | Будущий passthrough реального kit | подготовлен, но `export {}` (dormant) |
+| `local.tsx` | Локальные адаптеры, приведённые к контракту ui-kit | нет |
+| `legacy.ts` | Dialog/Sheet/LegacySelect/Label/RadioGroup — вне ui-kit | нет |
+
+### Component migration status
+
+| Component | Source now | Status | Notes |
+|---|---|---|---|
+| Text | local (`./index.tsx`) | kept local | ждём активацию `sber.ts` |
+| Title | local | kept local | — |
+| Link | local | kept local | — |
+| Row / Col | local | kept local | — |
+| Icon | local (registry → lucide) | kept local | kit использует свой `iconMap`; миграция = single-file swap |
+| Badge | shadcn passthrough | legacy-adapter | API не совпадает с ui-kit |
+| Loader | shadcn `Skeleton` | legacy-adapter | в ui-kit — spinner |
+| Button | local (`./Button.tsx`) | wrapper-ready | strict-compatible, легко завернуть в sber после активации |
+| Input | local (`./Input.tsx`) | wrapper-ready | strict-compatible |
+| Checkbox/Switch/Textarea/Tooltip | shadcn passthrough | legacy-adapter | требуется wrapper при активации kit |
+| Notice / Notification | alias на Alert | legacy-adapter | — |
+| Chips / RadioChips / CheckboxChips | local | kept local | strict-compatible |
+| Select | local | kept local | partial-compatible |
+| Modal | local (`./Modal.tsx`) | kept local | partial-compatible |
+| Dialog / Sheet / LegacySelect | `./legacy.ts` | legacy | не из ui-kit |
+
+### Что не мигрировано намеренно
+
+- Продуктовые компоненты `src/components/counterparty/*` — остаются product-кодом, не переезжают в ui-kit.
+- Прямые `lucide-react` импорты в доменах (≈17 файлов) — миграция блокируется тем, что `@sber-orm/ui-kit` сейчас нельзя реально импортировать.
+- Dialog/Sheet — остаются в `legacy.ts`, у kit нет аналога.
+
+### Готовность к полной миграции
+
+- **~70%**: compatibility layer и архитектура staged migration готовы; alias и TS paths настроены; продуктовый код импортирует только через `@/shared/ui`. Реальная активация `sber.ts` блокируется отсутствием dist/peer-зависимостей kit.
