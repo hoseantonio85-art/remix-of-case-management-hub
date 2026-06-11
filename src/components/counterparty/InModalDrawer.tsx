@@ -1,8 +1,13 @@
 import { ReactNode, useEffect } from "react";
-import { X } from "lucide-react";
+import { Icon } from "@/shared/ui";
 import { cn } from "@/lib/utils";
 
 /**
+ * product-component-candidate
+ * migration-note: InModalDrawer is not part of ALL_COMPONENTS.md.
+ * It is a product pattern (Drawer that opens inside its parent modal).
+ * After migration to @sber-orm/ui-kit this should live in product-kit.
+ *
  * Drawer-like panel that opens INSIDE its parent (the surrounding modal),
  * not over the whole page. The parent container MUST be `relative` and
  * `overflow-hidden`.
